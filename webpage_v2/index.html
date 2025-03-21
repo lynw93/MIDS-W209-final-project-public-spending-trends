@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.S. Government Spending Visualization</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/main.js"></script>
+    <script src="js/visualization1.js"></script>
+    <script src="js/visualization2.js"></script>
+    <script src="js/visualization3.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>U.S. Government Spending Visualization</h1>
+            <p>Explore U.S. Government spending data from 2018 to 2024</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <!-- Error message (hidden by default) -->
+        <div id="loadingError" class="error-message" style="display: none;"></div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-view="totalSpending">Total Spending</div>
+            <div class="nav-tab" data-view="budgetCategories">Budget Categories</div>
+            <div class="nav-tab" data-view="spendingChanges">Spending Changes</div>
+            <div class="nav-tab" data-view="impactfulEvents">Impactful Events</div>
+        </div>
+
+        <!-- Selector container with year and category selectors -->
+        <div class="selectors-container">
+            <div class="selector-item">
+                </div>
+            </div>
+
+            <div id="eventsVisualizationContainer" class="visualization-container">
+                <!-- Event visualizations will be added here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Data source: <a href="https://www.usaspending.gov/" target="_blank">USAspending.gov</a> | Created for DATASCI 209 Final Project</p>
+        </div>
+    </footer>
+</body>
+</html><label for="yearSelector">Select Year:</label>
+                <select id="yearSelector">
+                    <!-- Options will be added dynamically -->
+                </select>
+            </div>
+            <div class="selector-item">
+                <label for="categorySelect">Select Category:</label>
+                <select id="categorySelect">
+                    <!-- Options will be added dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Total Spending Section -->
+        <section id="totalSpendingContent" class="content-section">
+            <h2>Total Government Spending Over Time</h2>
+            <div class="visualization-container">
+                <iframe id="totalSpendingViz" class="visualization-iframe" src="visualizations/total_spending.html" frameborder="0"></iframe>
+            </div>
+
+            <div id="yearBreakdownSection" class="breakdown-section">
+                <h3>Category Breakdown for <span class="selected-year-display">2023</span></h3>
+                <p>Selected Category: <span class="selected-category-display">Total</span></p>
+                <div class="visualization-container">
+                    <!-- This will be a detailed view of spending for the selected year -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Budget Categories Section -->
+        <section id="budgetCategoriesContent" class="content-section" style="display: none;">
+            <h2>Budget Categories for <span class="selected-year-display">2023</span></h2>
+            <p>Selected Category: <span class="selected-category-display">Total</span></p>
+            <div class="visualization-container">
+                <iframe id="categoryBreakdownViz" class="visualization-iframe" src="visualizations/category_breakdown.html" frameborder="0"></iframe>
+            </div>
+
+            <div id="categoryDetailSection" class="breakdown-section">
+                <h3>Category Details</h3>
+                <div class="visualization-container">
+                    <!-- This will show details for a selected category -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Add this after the Budget Categories section -->
+        <section id="spendingChangesContent" class="content-section" style="display: none;">
+            <h2>Spending Changes Between Years</h2>
+            <p>Selected Category: <span class="selected-category-display">Total</span></p>
+            <div class="visualization-container">
+                <iframe id="spendingChangeViz" class="visualization-iframe" src="visualizations/spending_changes.html" frameborder="0"></iframe>
+            </div>
+
+            <div class="explanation">
+                <h3>Understanding This Visualization</h3>
+                <p>This chart shows how government spending has changed from year to year across different budget categories.</p>
+                <p>Use the dropdown menu to select different year pairs for comparison.</p>
+            </div>
+        </section>
+
+        <!-- Impactful Events Section -->
+        <section id="impactfulEventsContent" class="content-section" style="display: none;">
+            <h2>Impact of Major Events on Spending</h2>
+            <p>Selected Category: <span class="selected-category-display">Total</span></p>
+
+            <div class="events-selector">
+                <h3>Select events to explore:</h3>
+                <div class="event-checkbox-container">
+                    <label>
+                        <input type="checkbox" name="event-ukraine" value="ukraine"> Ukraine War
+                    </label>
+                    <label>
+                        <input type="checkbox" name="event-inflation" value="inflation"> Inflation Crisis
+                    </label>
+                        <input type="checkbox" name="event-covid" value="covid"> COVID-19 Pandemic
+                    </label>
+                    <label>

@@ -1,0 +1,226 @@
+<div>
+    <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+    <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+    <div id="6299155b-3ac9-45e9-b9dc-4a45ef691cb6" class="plotly-graph-div" style="height:600px; width:100%;"></div>
+    <script type="text/javascript">
+        window.PLOTLYENV=window.PLOTLYENV || {};
+
+        // Variables to store data received from the parent window
+        let changeData = null;
+        let selectedYear = "2023";
+        let selectedCategory = "Total";
+        let yearPairs = [];
+
+        // Listen for messages from the parent window
+        window.addEventListener('message', function(event) {
+            // Process data from parent window
+            if (event.data && event.data.type === 'updateVisualization') {
+                // Store data
+                changeData = event.data.changeData;
+                selectedYear = event.data.selectedYear || selectedYear;
+                selectedCategory = event.data.selectedCategory || selectedCategory;
+
+                // Extract available year pairs
+                if (changeData) {
+                    yearPairs = Object.keys(changeData);
+                }
+
+                // Default to the most recent year pair if the selected year is not in the data
+                if (yearPairs.length > 0 && !yearPairs.includes(selectedYear)) {
+                    selectedYear = yearPairs[yearPairs.length - 1];
+                }
+
+                // Update visualization
+                updateChart();
+            }
+        });
+
+        // Function to update the chart based on the current data and selections
+        function updateChart() {
+            if (!changeData || !changeData[selectedYear]) return; // Exit if no data available
+
+            const yearPairData = changeData[selectedYear];
+            const previousYear = yearPairData.previousYear;
+
+            // Prepare data for the bar chart
+            let categories = [];
+            let values = [];
+            let percentChanges = [];
+
+            // If a specific category is selected, only show that category
+            if (selectedCategory !== "Total") {
+                if (yearPairData.categories[selectedCategory]) {
+                    categories = [selectedCategory];
+                    values = [yearPairData.categories[selectedCategory].absoluteChange];
+                    percentChanges = [yearPairData.categories[selectedCategory].percentageChange];
+                }
+            } else {
+                // Show all categories
+                Object.entries(yearPairData.categories).forEach(([category, data]) => {
+                    categories.push(category);
+                    values.push(data.absoluteChange);
+                    percentChanges.push(data.percentageChange);
+                });
+
+                // Sort by absolute change
+                const indices = values.map((_, i) => i);
+                indices.sort((a, b) => values[b] - values[a]);
+
+                categories = indices.map(i => categories[i]);
+                values = indices.map(i => values[i]);
+                percentChanges = indices.map(i => percentChanges[i]);
+
+                // Limit to top 10 for readability if showing all categories
+                if (categories.length > 10) {
+                    categories = categories.slice(0, 10);
+                    values = values.slice(0, 10);
+                    percentChanges = percentChanges.slice(0, 10);
+                }
+            }
+
+            // Create the trace for the bar chart
+            const trace = {
+                x: categories,
+                y: values,
+                type: 'bar',
+                orientation: 'v',
+                marker: {
+                    color: percentChanges,
+                    coloraxis: 'coloraxis'
+                },
+                hovertemplate: '<b>%{x}</b><br>Change: %{y:$,.0f}<br>Percentage: %{customdata:.1f}%',
+                customdata: percentChanges
+            };
+
+            // Create the layout
+            const layout = {
+                title: {
+                    text: selectedCategory === "Total"
+                        ? `Spending Changes from ${previousYear} to ${selectedYear}`
+                        : `${selectedCategory} Spending Changes from ${previousYear} to ${selectedYear}`
+                },
+                xaxis: {
+                    title: {
+                        text: ""
+                    },
+                    tickangle: -45,
+                    categoryorder: 'total ascending'
+                },
+                yaxis: {
+                    title: {
+                        text: "Change in Spending (USD)"
+                    },
+                    tickformat: "$,.0f",
+                    gridcolor: "#eee"
+                },
+                coloraxis: {
+                    colorbar: {
+                        title: {
+                            text: "% Change"
+                        },
+                        ticksuffix: "%"
+                    },
+                    colorscale: [
+                        [0.0, "rgb(5,48,97)"],
+                        [0.1, "rgb(33,102,172)"],
+                        [0.2, "rgb(67,147,195)"],
+                        [0.3, "rgb(146,197,222)"],
+                        [0.4, "rgb(209,229,240)"],
+                        [0.5, "rgb(247,247,247)"],
+                        [0.6, "rgb(253,219,199)"],
+                        [0.7, "rgb(244,165,130)"],
+                        [0.8, "rgb(214,96,77)"],
+                        [0.9, "rgb(178,24,43)"],
+                        [1.0, "rgb(103,0,31)"]
+                    ],
+                    cmid: 0
+                },
+                barmode: 'relative',
+                font: {
+                    family: 'Arial, sans-serif',
+                    size: 14
+                },
+                margin: {
+                    t: 50,
+                    b: 100,
+                    l: 80,
+                    r: 50
+                },
+                plot_bgcolor: 'white',
+                height: 600,
+                annotations: [
+                    {
+                        showarrow: false,
+                        text: "Select Years:",
+                        x: 0,
+                        xref: "paper",
+                        y: 1.15,
+                        yref: "paper"
+                    }
+                ],
+                updatemenus: [{
+                    buttons: yearPairs.map(year => {
+                        const prevYear = changeData[year].previousYear;
+                        return {
+                            label: `${prevYear} to ${year}`,
+                            method: 'update',
+                            args: [
+                                {}, // Data update - handled by our own code
+                                {title: `Spending Changes from ${prevYear} to ${year}`}
+                            ]
+                        };
+                    }),
+                    direction: 'down',
+                    showactive: true,
+                    x: 0.1,
+                    y: 1.15
+                }]
+            };
+
+            // Create the chart
+            Plotly.newPlot(
+                "6299155b-3ac9-45e9-b9dc-4a45ef691cb6",
+                [trace],
+                layout,
+                {responsive: true}
+            );
+
+            // Add click event to bars
+            document.getElementById('6299155b-3ac9-45e9-b9dc-4a45ef691cb6').on('plotly_click', function(data) {
+                const clickedCategory = data.points[0].x;
+
+                // Notify parent window of the category click
+                window.parent.postMessage({
+                    type: 'visualizationEvent',
+                    action: 'categorySelected',
+                    category: clickedCategory
+                }, '*');
+            });
+
+            // Add dropdown change event
+            document.getElementById('6299155b-3ac9-45e9-b9dc-4a45ef691cb6').on('plotly_buttonclicked', function(data) {
+                const clickedYearPair = yearPairs[data.button.index];
+                selectedYear = clickedYearPair;
+                updateChart();
+            });
+        }
+
+        // Initialize an empty chart
+        if (document.getElementById("6299155b-3ac9-45e9-b9dc-4a45ef691cb6")) {
+            Plotly.newPlot(
+                "6299155b-3ac9-45e9-b9dc-4a45ef691cb6",
+                [{
+                    x: [],
+                    y: [],
+                    type: 'bar'
+                }],
+                {
+                    title: "Loading data...",
+                    plot_bgcolor: 'white',
+                    height: 600
+                },
+                {responsive: true}
+            );
+        }
+    </script>
+</div>

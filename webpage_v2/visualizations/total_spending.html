@@ -1,0 +1,133 @@
+<div>
+    <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+    <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+    <div id="29a35b94-7480-4e5a-b49d-7ffd9314afb4" class="plotly-graph-div" style="height:500px; width:100%;"></div>
+    <script type="text/javascript">
+        window.PLOTLYENV=window.PLOTLYENV || {};
+
+        // Variable to store data received from the parent window
+        let chartData = null;
+        let selectedYear = "2023";
+        let selectedCategory = "Total";
+
+        // Listen for messages from the parent window
+        window.addEventListener('message', function(event) {
+            // Process data from parent window
+            if (event.data && event.data.type === 'updateVisualization') {
+                // Store data
+                chartData = event.data.yearlyData;
+                selectedYear = event.data.selectedYear || selectedYear;
+                selectedCategory = event.data.selectedCategory || selectedCategory;
+
+                // Update visualization
+                updateChart();
+            }
+        });
+
+        // Function to update the chart based on the current data and selections
+        function updateChart() {
+            if (!chartData) return; // Exit if no data available
+
+            // Prepare data for the chart
+            const years = Object.keys(chartData).sort();
+            const values = years.map(year => {
+                if (selectedCategory === "Total") {
+                    return chartData[year].Total;
+                } else {
+                    return chartData[year][selectedCategory] || 0;
+                }
+            });
+
+            // Create the trace for the bar chart
+            const trace = {
+                x: years,
+                y: values,
+                type: 'bar',
+                marker: {
+                    color: '#1f77b4'
+                },
+                hovertemplate: `Year: %{x}<br>${selectedCategory} Spending: %{y:$,.0f}`
+            };
+
+            // Create the layout
+            const layout = {
+                title: selectedCategory === "Total"
+                    ? "Total U.S. Government Spending by Year"
+                    : `U.S. Government Spending on ${selectedCategory} by Year`,
+                xaxis: {
+                    title: "Fiscal Year"
+                },
+                yaxis: {
+                    title: "Spending (USD)",
+                    tickformat: "$,.0f",
+                    gridcolor: "#eee"
+                },
+                barmode: 'relative',
+                font: {
+                    family: 'Arial, sans-serif',
+                    size: 14
+                },
+                hoverlabel: {
+                    font: {
+                        size: 14
+                    },
+                    bgcolor: "white"
+                },
+                margin: {
+                    t: 50,
+                    b: 100,
+                    l: 80,
+                    r: 50
+                },
+                plot_bgcolor: "white",
+                height: 500,
+                annotations: [{
+                    text: "Click on a bar to see category breakdown",
+                    x: 0.5,
+                    y: -0.2,
+                    xref: "paper",
+                    yref: "paper",
+                    showarrow: false
+                }]
+            };
+
+            // Create the chart
+            Plotly.newPlot(
+                "29a35b94-7480-4e5a-b49d-7ffd9314afb4",
+                [trace],
+                layout,
+                {responsive: true, displayModeBar: true}
+            );
+
+            // Add click event to bars
+            document.getElementById('29a35b94-7480-4e5a-b49d-7ffd9314afb4').on('plotly_click', function(data) {
+                const clickedYear = data.points[0].x;
+
+                // Notify parent window of the year click
+                window.parent.postMessage({
+                    type: 'visualizationEvent',
+                    action: 'yearClicked',
+                    year: clickedYear
+                }, '*');
+            });
+        }
+
+        // Initialize an empty chart
+        if (document.getElementById("29a35b94-7480-4e5a-b49d-7ffd9314afb4")) {
+            Plotly.newPlot(
+                "29a35b94-7480-4e5a-b49d-7ffd9314afb4",
+                [{
+                    x: [],
+                    y: [],
+                    type: 'bar'
+                }],
+                {
+                    title: "Loading data...",
+                    plot_bgcolor: "white",
+                    height: 500
+                },
+                {responsive: true}
+            );
+        }
+    </script>
+</div>
