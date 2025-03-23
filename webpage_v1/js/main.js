@@ -18,7 +18,7 @@ let selectedView = "totalSpending"; // Default view
 // Function to load the JSON data
 async function loadData() {
     try {
-        const response = await fetch('data/budget_by_function.json');
+        const response = await fetch('../data/budget_by_function.json');
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -157,6 +157,11 @@ function initializeApplication() {
             });
         });
     }
+
+    // Initialize year display to default year
+    document.querySelectorAll('.selected-year-display').forEach(display => {
+        display.textContent = selectedYear;
+    });
 
     // Add event listeners to embedded visualizations
     addVisualizationEventListeners();
