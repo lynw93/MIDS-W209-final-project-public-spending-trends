@@ -109,6 +109,7 @@ const CategoryBreakdownViz = {
         updatePlot();
     }
 
+
     // // Plot update function
     function updatePlot() {
         if (!processedYearlyData[selectedYear]) {
@@ -117,6 +118,7 @@ const CategoryBreakdownViz = {
         }
 
         const yearData = processedYearlyData[selectedYear];
+        const yearTotal = yearData.Total
         const labels = Object.keys(yearData).filter(category => 
             category !== 'Unreported Data' && 
             category !== 'Governmental Receipts' &&
@@ -124,12 +126,14 @@ const CategoryBreakdownViz = {
         );
         const values = labels.map(category => yearData[category]);
         const parents = categories.map(() => "");
-        const percentages = categories.map(category => [
-            (yearData[category] / yearData.Total * 100).toFixed(1)]);
+        const percentages = values.map(category => [
+            (yearData[category] / yearTotal * 100).toFixed(1)]);
 
 
         console.log(labels);
         console.log(values);
+        console.log(yearData);
+        console.log(percentages);
 
         var data = [{
             type: 'treemap',
@@ -138,12 +142,13 @@ const CategoryBreakdownViz = {
             parents: parents,
             customdata: percentages,
             marker: {
-                // colors: values,
+                colors: values,
                 colorscale: 'Viridis'
             },
+            // textinfo: "label + percent{parent}",
             hoverinfo: 'label+value+percent',
-            texttemplate: '<b>%{label}</b><br>%{value:$,.0f}',
-            hovertemplate: '<b>%{label}</b><br>Amount: %{value:$,.0f}<br>Percentage: %{customdata[0]:.1f}%',
+            texttemplate: '<b>%{label}</b><br>%{percentParent:.1%}',
+            hovertemplate: '<b>%{label}</b><br>Amount: %{value:$,.0f}<br>Percentage: %{percentParent:.1%}',
             textposition: "middle center",
             pathbar: {visible: false}
         }];
