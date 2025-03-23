@@ -78,16 +78,8 @@ function processData() {
     categories = Array.from(categoriesSet);
 
     // Calculate yearly totals
-    Object.keys(processedYearlyData).forEach(year => {
-        let yearTotal = 0;
-        Object.entries(processedYearlyData[year]).forEach(([category, amount]) => {
-            // Exclude certain categories from total
-            if (category !== 'Unreported Data' && category !== 'Governmental Receipts') {
-                yearTotal += amount;
-            }
-        });
-        processedYearlyData[year].Total = yearTotal;
-    });
+    
+    ;
 
     console.log("Data processing complete");
 }

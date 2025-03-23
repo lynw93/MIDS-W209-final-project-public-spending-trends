@@ -120,6 +120,7 @@ const SpendingChangeViz = {
 // Add this visualization to the update function
 const originalUpdateVisualizations3 = updateVisualizations;
 updateVisualizations = function() {
+    console.log("Here here 3");
     // Call original function
     originalUpdateVisualizations3();
 

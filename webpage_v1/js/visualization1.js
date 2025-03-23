@@ -82,6 +82,7 @@ const TotalSpendingViz = {
 // Add this visualization to the update function
 const originalUpdateVisualizations = updateVisualizations;
 updateVisualizations = function() {
+    console.log("Here here 1");
     // Call original function
     originalUpdateVisualizations();
     

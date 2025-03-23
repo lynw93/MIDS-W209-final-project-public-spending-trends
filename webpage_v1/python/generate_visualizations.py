@@ -21,7 +21,7 @@ os.makedirs('visualizations', exist_ok=True)
 
 # Load the data
 print("Loading data...")
-with open('data/budget_by_function.json', 'r') as f:
+with open('../data/budget_by_function.json', 'r') as f:
     raw_data = json.load(f)
 
 # Process the data
@@ -197,7 +197,7 @@ fig_total.update_layout(
 
 # Save the figure as an HTML file
 fig_total.write_html(
-    'visualizations/total_spending.html',
+    '../visualizations/total_spending.html',
     include_plotlyjs='cdn',
     full_html=False,
     config={'responsive': True, 'displayModeBar': True}
@@ -220,7 +220,7 @@ for year in years:
 
 category_df = pd.DataFrame(category_data)
 
-# Create a treemap visualization for the latest year
+# Create a treemap visualization for the latest year as initialization
 latest_year = years[-1]
 latest_year_df = category_df[category_df['Year'] == latest_year]
 
@@ -230,7 +230,7 @@ fig_categories = px.treemap(
     values='Amount',
     color='Amount',
     color_continuous_scale='Viridis',
-    title=f'U.S. Government Spending by Category ({latest_year})',
+    # title=f'U.S. Government Spending by Category ({latest_year})',
     hover_data=['Percentage']
 )
 
@@ -265,27 +265,27 @@ for year in years_list:
         args=[update_data, {"title": f"U.S. Government Spending by Category ({year})"}]
     ))
 
-fig_categories.update_layout(
-    updatemenus=[
-        dict(
-            buttons=buttons,
-            direction="down",
-            showactive=True,
-            x=0.1,
-            y=1.15
-        )
-    ],
-    annotations=[
-        dict(
-            text="Select Year:",
-            x=0,
-            y=1.15,
-            xref="paper",
-            yref="paper",
-            showarrow=False
-        )
-    ]
-)
+# fig_categories.update_layout(
+#     updatemenus=[
+#         dict(
+#             buttons=buttons,
+#             direction="down",
+#             showactive=True,
+#             x=0.1,
+#             y=1.15
+#         )
+#     ],
+#     annotations=[
+#         dict(
+#             text="Select Year:",
+#             x=0,
+#             y=1.15,
+#             xref="paper",
+#             yref="paper",
+#             showarrow=False
+#         )
+#     ]
+# )
 
 # Customize layout
 fig_categories.update_layout(
@@ -296,7 +296,7 @@ fig_categories.update_layout(
 
 # Save the figure as an HTML file
 fig_categories.write_html(
-    'visualizations/category_breakdown.html',
+    '../visualizations/category_breakdown.html',
     include_plotlyjs='cdn',
     full_html=False,
     config={'responsive': True}
@@ -420,7 +420,7 @@ fig_changes.update_layout(
 
 # Save the figure as an HTML file
 fig_changes.write_html(
-    'visualizations/spending_changes.html',
+    '../visualizations/spending_changes.html',
     include_plotlyjs='cdn',
     full_html=False,
     config={'responsive': True}

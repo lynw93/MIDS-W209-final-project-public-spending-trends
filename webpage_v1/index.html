@@ -6,6 +6,7 @@
     <title>U.S. Government Spending Visualization</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/main.js"></script>
+    <script src="js/plotly-3.0.1.min.js" charset="utf-8"></script>
     <script src="js/visualization1.js"></script>
     <script src="js/visualization2.js"></script>
     <script src="js/visualization3.js"></script>
@@ -64,13 +65,16 @@
         <section id="budgetCategoriesContent" class="content-section" style="display: none;">
             <h2>Budget Categories for <span class="selected-year-display">2023</span></h2>
             <div class="visualization-container">
-                <iframe id="categoryBreakdownViz" class="visualization-iframe" src="visualizations/category_breakdown.html" frameborder="0"></iframe>
+                <!-- TODO: update src to plotly -->
+                <dev id="categoryBreakdownViz"></dev>
+                <!-- <iframe id="categoryBreakdownViz" class="visualization-iframe" src="visualizations/category_breakdown.html" frameborder="0"></iframe> -->
             </div>
 
             <div id="categoryDetailSection" class="breakdown-section">
                 <h3>Category Details</h3>
                 <div class="visualization-container">
                     <!-- This will show details for a selected category -->
+                     <!-- TODO: Add a new iframe to respond selection from previous iframe -->
                 </div>
             </div>
         </section>
