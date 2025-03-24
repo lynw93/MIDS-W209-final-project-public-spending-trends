@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.S. Government Spending Visualization</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/main.js"></script>
+    <script src="js/visualization1.js"></script>
+    <script src="js/visualization2.js"></script>
+    <script src="js/visualization3.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>U.S. Government Spending</h1>
+            <p>Explore U.S. Government spending data from 2018 to 2024</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <!-- Error message (hidden by default) -->
+        <div id="loadingError" class="error-message" style="display: none;"></div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-view="totalSpending">Total Spending</div>
+            <div class="nav-tab" data-view="budgetCategories">Budget Categories</div>
+            <div class="nav-tab" data-view="spendingChanges">Spending Changes</div>
+            <div class="nav-tab" id="impactful-tab" data-view="impactfulEvents">Impactful Events</div>
+        </div>
+
+        <!-- Total Spending Section -->
+        <section id="totalSpendingContent" class="content-section">
+            <h2>Total Government Spending Over Time</h2>
+            <div class="visualization-container">
+                <iframe id="totalSpendingViz" class="visualization-iframe" src="visualizations/total_spending.html" frameborder="0"></iframe>
+            </div>
+
+            <div id="yearBreakdownSection" class="breakdown-section">
+                <h3>Category Breakdown for <span class="selected-year-display">2023</span></h3>
+                <div class="visualization-container">
+                    <!-- This will be a detailed view of spending for the selected year -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Budget Categories Section -->
+        <section id="budgetCategoriesContent" class="content-section" style="display: none;">
+            <h2>Budget Categories for <span class="selected-year-display">2023</span></h2>
+            <div class="visualization-container">
+                <iframe id="categoryBreakdownViz" class="visualization-iframe" src="visualizations/category_breakdown.html" frameborder="0"></iframe>
+            </div>
+
+            <div id="categoryDetailSection" class="breakdown-section">
+                <h3>Category Details</h3>
+                <div class="visualization-container">
+                    <!-- This will show details for a selected category -->
+                </div>
+            </div>
+        </section>
+
+        <section id="spendingChangesContent" class="content-section" style="display: none;">
+            <h2>Spending Changes Between Years</h2>
+        
+            <div class="year-selector-container" style="margin-bottom: 15px;">
+                <label for="beginYearSelector">Begin Year:</label>
+                <select id="beginYearSelector">
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023" selected>2023</option>
+                </select>
+        
+                <label for="endYearSelector" style="margin-left: 20px;">End Year:</label>
+                <select id="endYearSelector">
+                    <option value="2019">2019</option>
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024" selected>2024</option>
+                </select>
+            </div>
+        
+            <div class="visualization-container">
+                <iframe id="spendingChangeViz" class="visualization-iframe" src="visualizations/spending_changes.html" frameborder="0"></iframe>
+            </div>
+        
+            <div class="explanation">
+                <h3>Understanding This Visualization</h3>
+                <p>This chart shows how government spending has changed from year to year across different budget categories.</p>
+            </div>
+        </section>        
+
+        <!-- Impactful Events Section -->
+        <section id="impactfulEventsContent" class="content-section" style="display: none;">
+            <h2>Impact of Major Events on Spending</h2>
+
+            <div class="events-selector">
+                <h3>Select events to explore:</h3>
+                <div class="event-checkbox-container">
+                    <label>
+                        <input type="radio" name="impact-event" value="covid" checked>&nbsp;COVID-19 Pandemic
+                      </label>
+                      <label>
+                        <input type="radio" name="impact-event" value="ukraine">&nbsp;Ukraine War
+                      </label>
+                      <label>
+                        <input type="radio" name="impact-event" value="inflation">&nbsp;Inflation Crisis
+                      </label>
+                      <label>
+                        <input type="radio" name="impact-event" value="all">&nbsp;All Events
+                      </label>
+                </div>
+            </div>
+
+            <div id="eventsVisualizationContainer" class="visualization-container">
+                <!-- Event visualizations will be added here -->
+            </div>
+
+            <div class="explanation">
+                <h3>Understanding This Visualization</h3>
+                <p>This chart highlights select categorical spending during an event time period for comparison purposes. 
+                <br> <i>Important</i>: Assumptions cannot be made without further analysis due to the fact that it's possible to have 
+                many events impacting data at one time.  In addition, an event may cause impact beyond it's duration.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Government Spending Data source: <a href="https://www.usaspending.gov/" target="_blank">USAspending.gov</a> |
+                Inflation Data source: <a href="https://fred.stlouisfed.org/series/CPIAUCSL" target="_blank">fred.stlouisfed.org</a> |
+                Created for Berkeley DATASCI 209 Final Project</p>
+        </div>
+    </footer>
+
+    <!-- Load D3 + the custom Impactful Events logic -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="js/impactful_events.js"></script>
+
+    
+</body>
+</html>
