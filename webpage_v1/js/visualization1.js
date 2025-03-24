@@ -5,6 +5,8 @@
  * which shows the total government spending over time.
  */
 
+let selectedCategory = "Total"; // Default selected category
+
 // Object to manage the total spending visualization
 const TotalSpendingViz = {
     // Reference to the iframe containing the visualization
@@ -17,12 +19,12 @@ const TotalSpendingViz = {
         this.iframe = document.getElementById('totalSpendingViz');
         
         // Add event listener for iframe messages
-        window.addEventListener('message', (event) => {
-            // Ensure the message is from our iframe
-            if (event.source === this.iframe.contentWindow) {
-                this.handleIframeMessage(event.data);
-            }
-        });
+        // window.addEventListener('message', (event) => {
+        //     // Ensure the message is from our iframe
+        //     if (event.source === this.iframe.contentWindow) {
+        //         this.handleIframeMessage(event.data);
+        //     }
+        // });
         
         // Send initial data to the iframe once it's loaded
         this.iframe.addEventListener('load', () => {
@@ -52,31 +54,31 @@ const TotalSpendingViz = {
     },
     
     // Handle messages from the iframe
-    handleIframeMessage: function(data) {
-        console.log("Message from Total Spending visualization:", data);
+    // handleIframeMessage: function(data) {
+    //     console.log("Message from Total Spending visualization:", data);
         
-        if (data.type === 'visualizationEvent') {
-            // Handle different types of events
-            switch (data.action) {
-                case 'yearClicked':
-                    // Update selected year
-                    selectedYear = data.year;
+    //     if (data.type === 'visualizationEvent') {
+    //         // Handle different types of events
+    //         switch (data.action) {
+    //             case 'yearClicked':
+    //                 // Update selected year
+    //                 selectedYear = data.year;
                     
-                    // Update UI elements
-                    document.getElementById('yearSelector').value = selectedYear;
-                    document.querySelectorAll('.selected-year-display').forEach(el => {
-                        el.textContent = selectedYear;
-                    });
+    //                 // Update UI elements
+    //                 document.getElementById('yearSelector').value = selectedYear;
+    //                 document.querySelectorAll('.selected-year-display').forEach(el => {
+    //                     el.textContent = selectedYear;
+    //                 });
                     
-                    // Update other visualizations
-                    updateVisualizations();
-                    break;
+    //                 // Update other visualizations
+    //                 updateVisualizations();
+    //                 break;
                     
-                default:
-                    console.log("Unknown event from Total Spending visualization");
-            }
-        }
-    }
+    //             default:
+    //                 console.log("Unknown event from Total Spending visualization");
+    //         }
+    //     }
+    // }
 };
 
 // Add this visualization to the update function
@@ -88,6 +90,46 @@ updateVisualizations = function() {
     
     // Update this visualization
     if (selectedView === 'totalSpending') {
+        selectorLabel = document.getElementById('selectorLabel');
+        selectorLabel.textContent = "Category: ";
+
+        // Initialize selector dropdown
+        const categorySelector = document.getElementById('selector');
+        if (categorySelector) {
+            // Clear existing options
+            categorySelector.innerHTML = '';
+
+            console.log(processedYearlyData);
+
+            // Add options for categories (in reverse chronological order)
+            const categories = Object.keys(processedCategoryData).sort().reverse();
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelector.appendChild(option);
+            });
+
+            // Set default value
+            categorySelector.value = selectedCategory;
+
+            // Add event listener
+            categorySelector.addEventListener('change', (event) => {
+                selectedCategory = event.target.value;
+                updateVisualizations();
+
+                // Update year display
+                document.querySelectorAll('.selected-year-display').forEach(display => {
+                    display.textContent = selectedCategory;
+                });
+            });
+        }
+
+        // Initialize year display to default year
+        document.querySelectorAll('.selected-category-display').forEach(display => {
+            display.textContent = selectedCategory;
+        });
+
         TotalSpendingViz.updateVisualization();
     }
 };

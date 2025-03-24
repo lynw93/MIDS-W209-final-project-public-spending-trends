@@ -37,35 +37,25 @@
             <div class="nav-tab" data-view="impactfulEvents">Impactful Events</div>
         </div>
 
-        <!-- Year selector -->
-        <div class="year-selector-container">
-            <label for="yearSelector">Select Year:</label>
-            <select id="yearSelector">
-                <!-- Options will be added dynamically -->
-            </select>
+        <!-- Selector -->
+        <div class="selector-container">
+            <label id="selectorLabel">Select Year:</label>
+            <select id="selector"></select>
         </div>
 
         <!-- Total Spending Section -->
         <section id="totalSpendingContent" class="content-section">
-            <h2>Total Government Spending Over Time</h2>
+            <h2><span class="selected-category-display">Total</span> Government Spending Over Time</h2>
             <div class="visualization-container">
                 <iframe id="totalSpendingViz" class="visualization-iframe" src="visualizations/total_spending.html" frameborder="0"></iframe>
             </div>
-
-            <div id="yearBreakdownSection" class="breakdown-section">
-                <h3>Category Breakdown for <span class="selected-year-display">2023</span></h3>
-                <div class="visualization-container">
-                    <!-- This will be a detailed view of spending for the selected year -->
-                </div>
-            </div>
-
         </section>
 
         <!-- Budget Categories Section -->
         <section id="budgetCategoriesContent" class="content-section" style="display: none;">
             <h2>Budget Categories for <span class="selected-year-display">2023</span></h2>
             <div class="visualization-container">
-                <dev id="categoryBreakdownViz"></dev>
+                <dev id="categoryBreakdownViz" class="visualization-iframe"></dev>
             </div>
         </section>
 

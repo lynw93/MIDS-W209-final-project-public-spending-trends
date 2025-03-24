@@ -65,18 +65,18 @@ header h1 {
 }
 
 /* Year selector */
-.year-selector-container {
+.selector-container {
     margin-bottom: 20px;
     display: flex;
     align-items: center;
 }
 
-.year-selector-container label {
+.selector-container label {
     margin-right: 10px;
     font-weight: bold;
 }
 
-#yearSelector {
+#selector {
     padding: 8px 12px;
     border: 1px solid #ced4da;
     border-radius: 4px;

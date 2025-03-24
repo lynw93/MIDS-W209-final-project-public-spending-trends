@@ -11,8 +11,8 @@
 let rawData; // Will hold the original JSON data
 let processedYearlyData = {}; // Will hold yearly aggregated data
 let processedQuarterlyData = {}; // Will hold quarterly data
+let processedCategoryData = {}; // Will hold category data
 let categories = []; // Will hold the list of budget function categories
-let selectedYear = "2023"; // Default selected year
 let selectedView = "totalSpending"; // Default view
 
 // Function to load the JSON data
@@ -77,9 +77,21 @@ function processData() {
     // Convert the set to array
     categories = Array.from(categoriesSet);
 
-    // Calculate yearly totals
+    yearsSet.forEach(year => {
+        yearTotal = 0;
+        Object.keys(processedYearlyData[year]).forEach(category => {
+            if (!processedCategoryData[category]) {
+                processedCategoryData[category] = {};
+            }
+            processedCategoryData[category][year] = processedYearlyData[year][category];
+            yearTotal += processedYearlyData[year][category];
+        });
+        if (!processedCategoryData['Total']) {
+            processedCategoryData['Total'] = {};
+        }
+        processedCategoryData['Total'][year] = yearTotal;
+    });
     
-    ;
 
     console.log("Data processing complete");
 }
@@ -120,43 +132,8 @@ function initializeApplication() {
     // Initialize with total spending view
     setActiveView('totalSpending');
 
-    // Initialize year selector dropdown
-    const yearSelector = document.getElementById('yearSelector');
-    if (yearSelector) {
-        // Clear existing options
-        yearSelector.innerHTML = '';
-
-        // Add options for each year (in reverse chronological order)
-        const years = Object.keys(processedYearlyData).sort().reverse();
-        years.forEach(year => {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearSelector.appendChild(option);
-        });
-
-        // Set default value
-        yearSelector.value = selectedYear;
-
-        // Add event listener
-        yearSelector.addEventListener('change', (event) => {
-            selectedYear = event.target.value;
-            updateVisualizations();
-
-            // Update year display
-            document.querySelectorAll('.selected-year-display').forEach(display => {
-                display.textContent = selectedYear;
-            });
-        });
-    }
-
-    // Initialize year display to default year
-    document.querySelectorAll('.selected-year-display').forEach(display => {
-        display.textContent = selectedYear;
-    });
-
     // Add event listeners to embedded visualizations
-    addVisualizationEventListeners();
+    // addVisualizationEventListeners();
 }
 
 // Function to set the active view
@@ -186,10 +163,7 @@ function setActiveView(view) {
 // Function to update visualizations based on current selections
 function updateVisualizations() {
     // For now, just log that we would update visualizations
-    console.log(`Updating visualizations for view: ${selectedView}, year: ${selectedYear}`);
-
-    // This function will be extended by Person 1 and Person 2
-    // to update their respective visualizations
+    console.log(`Updating visualizations for view: ${selectedView}`);
 }
 
 // Function to add event listeners to embedded visualizations
@@ -211,31 +185,6 @@ function addVisualizationEventListeners() {
 // Function to handle events from visualizations
 function handleVisualizationEvent(eventData) {
     console.log("Visualization event received:", eventData);
-
-    // Handle different types of events
-    switch (eventData.action) {
-        case 'yearSelected':
-            // Update selected year
-            selectedYear = eventData.year;
-
-            // Update year selector dropdown
-            const yearSelector = document.getElementById('yearSelector');
-            if (yearSelector) {
-                yearSelector.value = selectedYear;
-            }
-
-            // Update visualizations
-            updateVisualizations();
-            break;
-
-        case 'categorySelected':
-            // Handle category selection
-            // This will be implemented by Person 2
-            break;
-
-        default:
-            console.log("Unknown visualization event action");
-    }
 }
 
 // Initialize the application when the document is loaded
