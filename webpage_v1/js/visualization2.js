@@ -110,8 +110,6 @@ const CategoryBreakdownViz = {
                 }
             });
         });
-
-        console.log(this.processedYearlyFullData[2023]);
         
         // Generate treemap needed data
         Object.keys(this.processedYearlyFullData).forEach(year => {
@@ -172,8 +170,6 @@ const CategoryBreakdownViz = {
             this.processedCategoryBreakdown[year]['parents'] = parents;
         });
 
-        console.log(this.processedCategoryBreakdown[2023]);
-
         console.log("Data processing complete");
     },
 
@@ -209,7 +205,7 @@ const CategoryBreakdownViz = {
             maxdepth: 2,
             marker: {
                 colors: values,
-                colorscale: 'Viridis'
+                colorscale: 'Earth'
             },
             texttemplate: '<b>%{label}</b><br>%{percentParent:.1%}',
             hovertemplate: '<b>%{label}</b><br>Amount: %{value:$,.0f}<br>Percentage: %{percentParent:.1%}',
