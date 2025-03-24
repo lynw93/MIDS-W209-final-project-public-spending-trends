@@ -5,7 +5,7 @@
  * which shows the total government spending over time.
  */
 
-let selectedCategory = "Total"; // Default selected category
+const defaulCategory = "Total"; // Default selected category
 
 // Object to manage the total spending visualization
 const TotalSpendingViz = {
@@ -43,14 +43,14 @@ const TotalSpendingViz = {
         console.log("Updating Total Spending visualization");
         
         // Prepare data to send to the iframe
-        const dataToSend = {
-            type: 'updateVisualization',
-            yearlyData: processedYearlyData,
-            selectedYear: selectedYear
-        };
+        // const dataToSend = {
+        //     type: 'updateVisualization',
+        //     yearlyData: processedYearlyData,
+        //     // selectedYear: selectedYear
+        // };
         
-        // Send message to iframe
-        this.iframe.contentWindow.postMessage(dataToSend, '*');
+        // // Send message to iframe
+        // this.iframe.contentWindow.postMessage(dataToSend, '*');
     },
     
     // Handle messages from the iframe
@@ -65,7 +65,10 @@ const TotalSpendingViz = {
     //                 selectedYear = data.year;
                     
     //                 // Update UI elements
-    //                 document.getElementById('yearSelector').value = selectedYear;
+    //                 document.getElementById('yearSelector').value = 
+    // 
+    // 
+    // ;
     //                 document.querySelectorAll('.selected-year-display').forEach(el => {
     //                     el.textContent = selectedYear;
     //                 });
@@ -90,45 +93,33 @@ updateVisualizations = function() {
     
     // Update this visualization
     if (selectedView === 'totalSpending') {
-        selectorLabel = document.getElementById('selectorLabel');
-        selectorLabel.textContent = "Category: ";
+        if (viewChanged) {
+            selectorLabel = document.getElementById('selectorLabel');
+            selectorLabel.textContent = "Category: ";
 
-        // Initialize selector dropdown
-        const categorySelector = document.getElementById('selector');
-        if (categorySelector) {
-            // Clear existing options
-            categorySelector.innerHTML = '';
+            // Initialize selector dropdown
+            const categorySelector = document.getElementById('selector');
+            if (categorySelector) {
+                // Clear existing options
+                categorySelector.innerHTML = '';
 
-            console.log(processedYearlyData);
-
-            // Add options for categories (in reverse chronological order)
-            const categories = Object.keys(processedCategoryData).sort().reverse();
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category;
-                option.textContent = category;
-                categorySelector.appendChild(option);
-            });
-
-            // Set default value
-            categorySelector.value = selectedCategory;
-
-            // Add event listener
-            categorySelector.addEventListener('change', (event) => {
-                selectedCategory = event.target.value;
-                updateVisualizations();
-
-                // Update year display
-                document.querySelectorAll('.selected-year-display').forEach(display => {
-                    display.textContent = selectedCategory;
+                // Add options for categories (in reverse chronological order)
+                const categories = Object.keys(processedCategoryData).sort().reverse();
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelector.appendChild(option);
                 });
-            });
-        }
 
-        // Initialize year display to default year
-        document.querySelectorAll('.selected-category-display').forEach(display => {
-            display.textContent = selectedCategory;
-        });
+                // Set default value
+                categorySelector.value = defaulCategory;
+                selectedVal = defaulCategory;
+                document.querySelectorAll('.selected-display').forEach(display => {
+                    display.textContent = selectedVal;
+                });
+            }
+        }
 
         TotalSpendingViz.updateVisualization();
     }

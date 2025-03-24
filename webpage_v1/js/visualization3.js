@@ -47,7 +47,7 @@ const SpendingChangeViz = {
         const dataToSend = {
             type: 'updateVisualization',
             changeData: changeData,
-            selectedYear: selectedYear
+            // selectedYear: selectedYear
         };
 
         // Send message to iframe
@@ -104,7 +104,7 @@ const SpendingChangeViz = {
                     const event = new CustomEvent('categorySelected', {
                         detail: {
                             category: data.category,
-                            year: selectedYear
+                            // year: selectedYear
                         }
                     });
                     document.dispatchEvent(event);
