@@ -13,7 +13,9 @@ let processedYearlyData = {}; // Will hold yearly aggregated data
 let processedQuarterlyData = {}; // Will hold quarterly data
 let processedCategoryData = {}; // Will hold category data
 let categories = []; // Will hold the list of budget function categories
-let selectedView = "totalSpending"; // Default view
+let selectedVal = ""; // Selected value from selector
+let viewChanged = true;
+let selectedView = "";
 
 // Function to load the JSON data
 async function loadData() {
@@ -139,6 +141,7 @@ function initializeApplication() {
 // Function to set the active view
 function setActiveView(view) {
     console.log(`Setting active view to: ${view}`);
+    viewChanged = true;
     selectedView = view;
 
     // Update active tab
@@ -158,6 +161,8 @@ function setActiveView(view) {
 
     // Update visualizations
     updateVisualizations();
+
+    viewChanged = false;
 }
 
 // Function to update visualizations based on current selections
@@ -191,4 +196,20 @@ function handleVisualizationEvent(eventData) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Document loaded, initializing application...");
     loadData();
+
+    // Add event listener
+    const selector = document.getElementById('selector');
+    if (selector) {
+        selector.addEventListener('change', (event) => {
+            selectedVal = event.target.value;
+            // selector.sele
+            
+            // Update year display
+            document.querySelectorAll('.selected-display').forEach(display => {
+                display.textContent = selectedVal;
+            });
+
+            updateVisualizations();
+        });
+    }
 });

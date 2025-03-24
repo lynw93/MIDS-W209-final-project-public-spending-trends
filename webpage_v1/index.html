@@ -45,15 +45,16 @@
 
         <!-- Total Spending Section -->
         <section id="totalSpendingContent" class="content-section">
-            <h2><span class="selected-category-display">Total</span> Government Spending Over Time</h2>
+            <h2><span class="selected-display" id="selected-category-display">Total</span> Government Spending Over Time</h2>
             <div class="visualization-container">
-                <iframe id="totalSpendingViz" class="visualization-iframe" src="visualizations/total_spending.html" frameborder="0"></iframe>
+                <dev id="totalSpendingViz" class="visualization-iframe"></dev>
+                <!-- <iframe id="totalSpendingViz" class="visualization-iframe" src="visualizations/total_spending.html" frameborder="0"></iframe> -->
             </div>
         </section>
 
         <!-- Budget Categories Section -->
         <section id="budgetCategoriesContent" class="content-section" style="display: none;">
-            <h2>Budget Categories for <span class="selected-year-display">2023</span></h2>
+            <h2>Budget Categories for <span class="selected-display" id="selected-year-display">2023</span></h2>
             <div class="visualization-container">
                 <dev id="categoryBreakdownViz" class="visualization-iframe"></dev>
             </div>

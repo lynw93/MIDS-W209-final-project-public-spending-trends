@@ -5,7 +5,7 @@
  * which shows government spending broken down by category.
  */
 
-let selectedYear = "2023"; // Default selected year
+const defaultYear = "2023"; // Default selected year
 
 // Object to manage the category breakdown visualization
 const CategoryBreakdownViz = {
@@ -187,12 +187,12 @@ const CategoryBreakdownViz = {
 
     // Plot update function
     updatePlot: function() {
-        if (!this.processedCategoryBreakdown[selectedYear]) {
-            console.log("Missing data for year: ", selectedYear);
+        if (!this.processedCategoryBreakdown[selectedVal]) {
+            console.log("Missing data for year: ", selectedVal);
             return;
         }
 
-        const yearData = this.processedCategoryBreakdown[selectedYear];
+        const yearData = this.processedCategoryBreakdown[selectedVal];
         const labels = yearData.categories;
         const values = yearData.values;
         const parents = yearData.parents;
@@ -217,7 +217,7 @@ const CategoryBreakdownViz = {
         }];
 
         const layout = {
-            title: `U.S. Government Spending by Category (${selectedYear})`,
+            title: `U.S. Government Spending by Category (${selectedVal})`,
             margin: {t: 80, l: 20, r: 20, b: 20},
             height: 800,
             width: 800,
@@ -238,43 +238,33 @@ updateVisualizations = function() {
     
     // Update this visualization
     if (selectedView === 'budgetCategories') {
-        selectorLabel = document.getElementById('selectorLabel');
-        selectorLabel.textContent = "Select Year: ";
-
-        // Initialize year selector dropdown
-        const yearSelector = document.getElementById('selector');
-        if (yearSelector) {
-            // Clear existing options
-            yearSelector.innerHTML = '';
-
-            // Add options for each year (in reverse chronological order)
-            const years = Object.keys(processedYearlyData).sort().reverse();
-            years.forEach(year => {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                yearSelector.appendChild(option);
-            });
-
-            // Set default value
-            yearSelector.value = selectedYear;
-
-            // Add event listener
-            yearSelector.addEventListener('change', (event) => {
-                selectedYear = event.target.value;
-                updateVisualizations();
-
-                // Update year display
-                document.querySelectorAll('.selected-year-display').forEach(display => {
-                    display.textContent = selectedYear;
+        if (viewChanged) {
+            selectorLabel = document.getElementById('selectorLabel');
+            selectorLabel.textContent = "Select Year: ";
+    
+            // Initialize year selector dropdown
+            const yearSelector = document.getElementById('selector');
+            if (yearSelector) {
+                // Clear existing options
+                yearSelector.innerHTML = '';
+    
+                // Add options for each year (in reverse chronological order)
+                const years = Object.keys(processedYearlyData).sort().reverse();
+                years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelector.appendChild(option);
                 });
-            });
+    
+                // Set default value
+                yearSelector.value = defaultYear;
+                selectedVal = defaultYear;
+                document.querySelectorAll('.selected-display').forEach(display => {
+                    display.textContent = selectedVal;
+                });   
+            }
         }
-
-        // Initialize year display to default year
-        document.querySelectorAll('.selected-year-display').forEach(display => {
-            display.textContent = selectedYear;
-        });
 
         CategoryBreakdownViz.updateVisualization();
     }
