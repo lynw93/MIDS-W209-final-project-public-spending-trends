@@ -9,22 +9,17 @@
 const CategoryBreakdownViz = {
     // Reference to the iframe containing the visualization
     iframe: null,
+    rawFullData: null,
+    processedYearlyFullData: {},  // {year: category: {amount, subfunctions: {subCategory: subAmount}}, total}
+    processedCategoryBreakdown: {},  // {year: categories, values, percentages, parents}
     
     // Initialize the visualization
     initialize: function() {
         console.log("Initializing Category Breakdown visualization");
         
         this.iframe = document.getElementById('categoryBreakdownViz');
-        
-        // Add event listener for iframe messages
-        // window.addEventListener('message', (event) => {
-        //     // Ensure the message is from our iframe
-        //     if (event.source === this.iframe.contentWindow) {
-        //         this.handleIframeMessage(event.data);
-        //     }
-        // });
 
-        initializeVisualization();
+        this.initializeVisualization();
         
         // Send initial data to the iframe once it's loaded
         this.iframe.addEventListener('load', () => {
@@ -39,101 +34,171 @@ const CategoryBreakdownViz = {
             console.warn("Category breakdown iframe not ready yet");
             return;
         }
-        
         console.log("Updating Category Breakdown Graph");
+        this.updatePlot();
+    },
 
-        updatePlot();
-    }
-}
+    // Function to load the JSON data
+    loadFullData: async function() {
+        try {
+            const response = await fetch('../data/budget_func_subfunc.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
-    // TODO: Update plotly here
+            this.rawFullData = await response.json();
+            console.log("Data loaded successfully");
+            this.processFullData();
+        } catch (error) {
+            console.error('Error loading the data:', error);
+            document.getElementById('loadingError').style.display = 'block';
+            document.getElementById('loadingError').textContent = `Error loading data: ${error.message}`;
+        }
+    },
 
-    // Those are duplicated from main.js
-    // Not needed at all!!!!
+    // Function to process the raw data into usable formats
+    processFullData: function () {
+        console.log("Processing data...");
 
-    // // Step 1: Fetch data from GitHub
-    // async function loadData2() {
-    //     try {
-    //         const response = await fetch('https://raw.githubusercontent.com/lynw93/MIDS-W209-final-project-public-spending-trends/refs/heads/main/webpage_v1/data/budget_by_function.json');
-    //         const rawData = await response.json();
-    //         return processData2(rawData);
-    //     } catch (error) {
-    //         console.error('Error loading data:', error);
-    //         return null;
-    //     }
-    // }
+        // Process data for each quarter
+        Object.keys(this.rawFullData).forEach(quarter => {
+            // Extract year from quarter (e.g., "2018Q1" -> "2018")
+            const year = quarter.substring(0, 4);
 
-    // // Step 2: Process data similar to Python code
-    // function processData2(rawData) {
-    //     const years = Object.keys(rawData).sort();
-    //     const categories = new Set();
-    //     const processedData = {};
-
-    //     // First pass to get all categories
-    //     years.forEach(year => {
-    //         Object.keys(rawData[year]).forEach(category => {
-    //             if (category !== 'Total') categories.add(category);
-    //         });
-    //     });
-
-    //     // Second pass to create structured data
-    //     years.forEach(year => {
-    //         processedData[year] = [];
-    //         const yearTotal = rawData[year].Total;
+            // Initialize year data if not exists
+            if (!this.processedYearlyFullData[year]) {
+                this.processedYearlyFullData[year] = {};
+            }
             
-    //         categories.forEach(category => {
-    //             if (rawData[year][category]) {
-    //                 processedData[year].push({
-    //                     Category: category,
-    //                     Amount: rawData[year][category],
-    //                     Percentage: (rawData[year][category] / yearTotal * 100)
-    //                 });
-    //             }
-    //         });
-    //     });
+            // Process each category in the quarter
+            this.rawFullData[quarter].forEach(item => {
+                const category = item.name;
 
-    //     return {
-    //         years: years,
-    //         categories: Array.from(categories),
-    //         data: processedData
-    //     };
-    // }
+                // Skip unnessary data
+                // if (category == 'Unreported Data' || category == 'Governmental Receipts')
+                //     return;
 
-    // Step 3/4: Initialize visualization
-    async function initializeVisualization() {
-        if (!processedYearlyData) {
+                const amount = item.amount;
+
+                // Aggregate to yearly data
+                if (!('total' in this.processedYearlyFullData[year])) {
+                    this.processedYearlyFullData[year]['total'] = 0;
+                }
+                this.processedYearlyFullData[year]['total'] += amount;
+
+                if (!this.processedYearlyFullData[year][category]) {
+                    this.processedYearlyFullData[year][category] = {};
+                }
+                if (!this.processedYearlyFullData[year][category]['amount']) {
+                    this.processedYearlyFullData[year][category]['amount'] = 0;
+                }
+                this.processedYearlyFullData[year][category]['amount'] += amount;
+
+                if (!this.processedYearlyFullData[year][category]['subfunctions']) {
+                    this.processedYearlyFullData[year][category]['subfunctions'] = {};
+                }
+                if ('subfunctions' in item) {
+                    item.subfunctions.forEach(subitem => {
+                        const subCategory = subitem.name;
+                        const subAmount = subitem.amount;
+
+                        if (!this.processedYearlyFullData[year][category]['subfunctions'][subCategory]) {
+                            this.processedYearlyFullData[year][category]['subfunctions'][subCategory] = 0;
+                        } 
+                        this.processedYearlyFullData[year][category]['subfunctions'][subCategory] += subAmount;
+                    });
+                }
+            });
+        });
+
+        console.log(this.processedYearlyFullData[2023]);
+        
+        // Generate treemap needed data
+        Object.keys(this.processedYearlyFullData).forEach(year => {
+            if (!this.processedCategoryBreakdown[year]) {
+                this.processedCategoryBreakdown[year] = {};
+            }
+
+            categories = [];
+            values = [];
+            percentages = [];
+            parents = [];
+
+            const totalAmount = this.processedYearlyFullData[year].total;
+
+            // Top/total
+            categories.push('All');
+            values.push(totalAmount);
+            percentages.push((100.0).toFixed(1));
+            parents.push('');
+
+            Object.keys(this.processedYearlyFullData[year]).filter(cat => 
+                cat !== 'total'
+            ).forEach(cat => {
+                const catAmount = this.processedYearlyFullData[year][cat]['amount'];
+
+                categories.push(cat);
+                values.push(catAmount);
+                if (totalAmount == 0) {
+                    percentages.push((0.0).toFixed(1));
+                } else {
+                    percentages.push((catAmount / totalAmount * 100).toFixed(1));
+                }
+                parents.push('All');
+
+                const subCatData = this.processedYearlyFullData[year][cat]['subfunctions'];
+
+                Object.keys(subCatData).forEach(subCat => {
+                    // Specially handling subcategory equals to parent
+                    // e.g. Medicare
+                    if (subCat == cat) {
+                        categories.push(subCat.toLowerCase());
+                    } else {
+                        categories.push(subCat);
+                    }
+                    values.push(subCatData[subCat]);
+                    if (catAmount == 0) {
+                        percentages.push((0.0).toFixed(1));
+                    } else {
+                        percentages.push((subCatData[subCat] / catAmount * 100).toFixed(1));
+                    }
+                    parents.push(cat);
+                });
+            });
+
+            this.processedCategoryBreakdown[year]['categories'] = categories;
+            this.processedCategoryBreakdown[year]['values'] = values;
+            this.processedCategoryBreakdown[year]['percentages'] = percentages;
+            this.processedCategoryBreakdown[year]['parents'] = parents;
+        });
+
+        console.log(this.processedCategoryBreakdown[2023]);
+
+        console.log("Data processing complete");
+    },
+
+    // Initialize Visualization
+    initializeVisualization: async function() {
+        if (!this.processedCategoryBreakdown) {
             console.log("Missing data, exiting")
             return;
         }
         console.log("Initializing Category Breakdown Graph");
-        updatePlot();
-    }
+        this.updatePlot();
+    },
 
-
-    // // Plot update function
-    function updatePlot() {
-        if (!processedYearlyData[selectedYear]) {
+    // Plot update function
+    updatePlot: function() {
+        if (!this.processedCategoryBreakdown[selectedYear]) {
             console.log("Missing data for year: ", selectedYear);
             return;
         }
 
-        const yearData = processedYearlyData[selectedYear];
-        const yearTotal = yearData.Total
-        const labels = Object.keys(yearData).filter(category => 
-            category !== 'Unreported Data' && 
-            category !== 'Governmental Receipts' &&
-            category !== 'Total'
-        );
-        const values = labels.map(category => yearData[category]);
-        const parents = categories.map(() => "");
-        const percentages = values.map(category => [
-            (yearData[category] / yearTotal * 100).toFixed(1)]);
-
-
-        console.log(labels);
-        console.log(values);
-        console.log(yearData);
-        console.log(percentages);
+        const yearData = this.processedCategoryBreakdown[selectedYear];
+        const labels = yearData.categories;
+        const values = yearData.values;
+        const parents = yearData.parents;
+        const percentages = yearData.percentages;
 
         var data = [{
             type: 'treemap',
@@ -141,16 +206,16 @@ const CategoryBreakdownViz = {
             labels: labels,
             parents: parents,
             customdata: percentages,
+            maxdepth: 2,
             marker: {
                 colors: values,
                 colorscale: 'Viridis'
             },
-            // textinfo: "label + percent{parent}",
-            hoverinfo: 'label+value+percent',
             texttemplate: '<b>%{label}</b><br>%{percentParent:.1%}',
             hovertemplate: '<b>%{label}</b><br>Amount: %{value:$,.0f}<br>Percentage: %{percentParent:.1%}',
             textposition: "middle center",
-            pathbar: {visible: false}
+            pathbar: {visible: false},
+            branchvalues: "total",
         }];
 
         const layout = {
@@ -158,65 +223,13 @@ const CategoryBreakdownViz = {
             margin: {t: 80, l: 20, r: 20, b: 20},
             height: 600,
             width: 800,
-            // coloraxis: {showscale: false}
+            coloraxis: {showscale: false}
         };
 
-        console.log("Plotting", data);
-
         Plotly.newPlot('categoryBreakdownViz', data, layout);
-    }
+    },
 
-
-        // Prepare data to send to the iframe
-        // const dataToSend = {
-        //     type: 'updateVisualization',
-        //     yearlyData: processedYearlyData,
-        //     selectedYear: selectedYear,
-        //     categories: categories.filter(c => c !== 'Unreported Data' && c !== 'Governmental Receipts')
-        // };
-        
-        // // Send message to iframe
-        // this.iframe.contentWindow.postMessage(dataToSend, '*');
-    // },
-    
-    // Handle messages from the iframe
-    // handleIframeMessage: function(data) {
-    //     console.log("Message from Category Breakdown visualization:", data);
-        
-    //     if (data.type === 'visualizationEvent') {
-    //         // Handle different types of events
-    //         switch (data.action) {
-    //             case 'categoryClicked':
-    //                 // Trigger event to show category details
-    //                 const event = new CustomEvent('categorySelected', {
-    //                     detail: {
-    //                         category: data.category,
-    //                         year: selectedYear
-    //                     }
-    //                 });
-    //                 document.dispatchEvent(event);
-    //                 break;
-                    
-    //             case 'yearChanged':
-    //                 console.log("year changed");
-    //                 // Update selected year
-    //                 selectedYear = data.year;
-                    
-    //                 // Update UI elements
-    //                 document.getElementById('yearSelector').value = selectedYear;
-    //                 document.querySelectorAll('.selected-year-display').forEach(el => {
-    //                     el.textContent = selectedYear;
-    //                 });
-                    
-    //                 // Update other visualizations
-    //                 updateVisualizations();
-    //                 break;
-                    
-    //             default:
-    //                 console.log("Unknown event from Category Breakdown visualization");
-    //         }
-    //     }
-    // }
+}
 
 // Add this visualization to the update function
 const originalUpdateVisualizations2 = updateVisualizations;
@@ -238,6 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeApplication = function() {
         // Call original function
         originalInitializeApplication();
+
+        CategoryBreakdownViz.loadFullData();
         
         // Initialize this visualization
         CategoryBreakdownViz.initialize();
