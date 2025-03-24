@@ -5,6 +5,8 @@
  * which shows government spending broken down by category.
  */
 
+let selectedYear = "2023"; // Default selected year
+
 // Object to manage the category breakdown visualization
 const CategoryBreakdownViz = {
     // Reference to the iframe containing the visualization
@@ -217,7 +219,7 @@ const CategoryBreakdownViz = {
         const layout = {
             title: `U.S. Government Spending by Category (${selectedYear})`,
             margin: {t: 80, l: 20, r: 20, b: 20},
-            height: 600,
+            height: 800,
             width: 800,
             coloraxis: {showscale: false}
         };
@@ -236,6 +238,44 @@ updateVisualizations = function() {
     
     // Update this visualization
     if (selectedView === 'budgetCategories') {
+        selectorLabel = document.getElementById('selectorLabel');
+        selectorLabel.textContent = "Select Year: ";
+
+        // Initialize year selector dropdown
+        const yearSelector = document.getElementById('selector');
+        if (yearSelector) {
+            // Clear existing options
+            yearSelector.innerHTML = '';
+
+            // Add options for each year (in reverse chronological order)
+            const years = Object.keys(processedYearlyData).sort().reverse();
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelector.appendChild(option);
+            });
+
+            // Set default value
+            yearSelector.value = selectedYear;
+
+            // Add event listener
+            yearSelector.addEventListener('change', (event) => {
+                selectedYear = event.target.value;
+                updateVisualizations();
+
+                // Update year display
+                document.querySelectorAll('.selected-year-display').forEach(display => {
+                    display.textContent = selectedYear;
+                });
+            });
+        }
+
+        // Initialize year display to default year
+        document.querySelectorAll('.selected-year-display').forEach(display => {
+            display.textContent = selectedYear;
+        });
+
         CategoryBreakdownViz.updateVisualization();
     }
 };
