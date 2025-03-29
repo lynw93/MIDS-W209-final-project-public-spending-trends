@@ -8,10 +8,10 @@
  */
 
 // Global variables
-let rawData; // Will hold the original JSON data
-let processedYearlyData = {}; // Will hold yearly aggregated data
-let processedQuarterlyData = {}; // Will hold quarterly data
-let processedCategoryData = {}; // Will hold category data
+let rawFullData = null;
+let processedYearlyFullData = {};
+let processedYearlyCategoryBreakdown = {};
+let processedCategoryData = {};
 let categories = []; // Will hold the list of budget function categories
 let selectedVal = ""; // Selected value from selector
 let viewChanged = true;
@@ -20,12 +20,12 @@ let selectedView = "";
 // Function to load the JSON data
 async function loadData() {
     try {
-        const response = await fetch('../data/budget_by_function.json');
+        const response = await fetch('../data/budget_func_subfunc.json');
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        rawData = await response.json();
+        rawFullData = await response.json();
         console.log("Data loaded successfully");
         processData();
         initializeApplication();
@@ -40,62 +40,136 @@ async function loadData() {
 function processData() {
     console.log("Processing data...");
 
-    // Extract unique categories and years
-    const categoriesSet = new Set();
-    const yearsSet = new Set();
-
     // Process data for each quarter
-    Object.keys(rawData).forEach(quarter => {
+    Object.keys(rawFullData).forEach(quarter => {
         // Extract year from quarter (e.g., "2018Q1" -> "2018")
         const year = quarter.substring(0, 4);
-        yearsSet.add(year);
 
         // Initialize year data if not exists
-        if (!processedYearlyData[year]) {
-            processedYearlyData[year] = {};
+        if (!processedYearlyFullData[year]) {
+            processedYearlyFullData[year] = {};
         }
-
-        // Store quarterly data
-        processedQuarterlyData[quarter] = {};
-
+        
         // Process each category in the quarter
-        rawData[quarter].forEach(item => {
+        rawFullData[quarter].forEach(item => {
             const category = item.name;
+
+            // Skip unnessary data
+            // if (category == 'Unreported Data' || category == 'Governmental Receipts')
+            //     return;
+
             const amount = item.amount;
 
-            categoriesSet.add(category);
-
-            // Add to quarterly data
-            processedQuarterlyData[quarter][category] = amount;
-
             // Aggregate to yearly data
-            if (!processedYearlyData[year][category]) {
-                processedYearlyData[year][category] = 0;
+            if (!('total' in processedYearlyFullData[year])) {
+                processedYearlyFullData[year]['total'] = 0;
             }
-            processedYearlyData[year][category] += amount;
+            processedYearlyFullData[year]['total'] += amount;
+
+            if (!processedYearlyFullData[year][category]) {
+                processedYearlyFullData[year][category] = {};
+            }
+            if (!processedYearlyFullData[year][category]['amount']) {
+                processedYearlyFullData[year][category]['amount'] = 0;
+            }
+            processedYearlyFullData[year][category]['amount'] += amount;
+
+            if (!processedYearlyFullData[year][category]['subfunctions']) {
+                processedYearlyFullData[year][category]['subfunctions'] = {};
+            }
+            if ('subfunctions' in item) {
+                item.subfunctions.forEach(subitem => {
+                    const subCategory = subitem.name;
+                    const subAmount = subitem.amount;
+
+                    if (!processedYearlyFullData[year][category]['subfunctions'][subCategory]) {
+                        processedYearlyFullData[year][category]['subfunctions'][subCategory] = 0;
+                    } 
+                    processedYearlyFullData[year][category]['subfunctions'][subCategory] += subAmount;
+                });
+            }
         });
     });
-
-    // Convert the set to array
-    categories = Array.from(categoriesSet);
-
-    yearsSet.forEach(year => {
-        yearTotal = 0;
-        Object.keys(processedYearlyData[year]).forEach(category => {
-            if (!processedCategoryData[category]) {
-                processedCategoryData[category] = {};
-            }
-            processedCategoryData[category][year] = processedYearlyData[year][category];
-            yearTotal += processedYearlyData[year][category];
-        });
+    
+    // TODO: Move to specific page
+    // Generate barchart needed data
+    Object.keys(processedYearlyFullData).forEach(year => {
+        // Total
         if (!processedCategoryData['Total']) {
             processedCategoryData['Total'] = {};
         }
-        processedCategoryData['Total'][year] = yearTotal;
-    });
-    
+        processedCategoryData['Total'][year] = processedYearlyFullData[year].total
 
-    console.log("Data processing complete");
+        Object.keys(processedYearlyFullData[year]).filter(cat => 
+            cat !== 'total'
+        ).forEach(cat => {
+            if (!processedCategoryData[cat]) {
+                processedCategoryData[cat] = {};
+            }
+            processedCategoryData[cat][year] = processedYearlyFullData[year][cat]['amount'];
+        });
+    });
+
+    // Generate treemap needed data
+    Object.keys(processedYearlyFullData).forEach(year => {
+        if (!processedYearlyCategoryBreakdown[year]) {
+            processedYearlyCategoryBreakdown[year] = {};
+        }
+
+        categories = [];
+        values = [];
+        percentages = [];
+        parents = [];
+
+        const totalAmount = processedYearlyFullData[year].total;
+
+        // Top/total
+        categories.push('Total');
+        values.push(totalAmount);
+        percentages.push((100.0).toFixed(1));
+        parents.push('');
+
+        Object.keys(processedYearlyFullData[year]).filter(cat => 
+            cat !== 'total'
+        ).forEach(cat => {
+            const catAmount = processedYearlyFullData[year][cat]['amount'];
+
+            categories.push(cat);
+            values.push(catAmount);
+            if (totalAmount == 0) {
+                percentages.push((0.0).toFixed(1));
+            } else {
+                percentages.push((catAmount / totalAmount * 100).toFixed(1));
+            }
+            parents.push('Total');
+
+            const subCatData = processedYearlyFullData[year][cat]['subfunctions'];
+
+            Object.keys(subCatData).forEach(subCat => {
+                // Specially handling subcategory equals to parent
+                // e.g. Medicare
+                if (subCat == cat) {
+                    categories.push(subCat.toLowerCase());
+                } else {
+                    categories.push(subCat);
+                }
+                values.push(subCatData[subCat]);
+                if (catAmount == 0) {
+                    percentages.push((0.0).toFixed(1));
+                } else {
+                    percentages.push((subCatData[subCat] / catAmount * 100).toFixed(1));
+                }
+                parents.push(cat);
+            });
+        });
+
+        processedYearlyCategoryBreakdown[year]['categories'] = categories;
+        processedYearlyCategoryBreakdown[year]['values'] = values;
+        processedYearlyCategoryBreakdown[year]['percentages'] = percentages;
+        processedYearlyCategoryBreakdown[year]['parents'] = parents;
+    });
+
+    console.log("Data processing complete", processedYearlyCategoryBreakdown);
 }
 
 // Function to format large numbers in a more readable way
@@ -202,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selector) {
         selector.addEventListener('change', (event) => {
             selectedVal = event.target.value;
-            // selector.sele
             
             // Update year display
             document.querySelectorAll('.selected-display').forEach(display => {
