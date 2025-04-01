@@ -8,24 +8,25 @@
  */
 
 // Global variables
-let rawData; // Will hold the original JSON data
-let processedYearlyData = {}; // Will hold yearly aggregated data
-let processedQuarterlyData = {}; // Will hold quarterly data
+let rawFullData = null;
+let processedYearlyFullData = {};
+let processedYearlyCategoryBreakdown = {};
+let processedCategoryData = {};
 let categories = []; // Will hold the list of budget function categories
-let selectedYear = "2023"; // Default selected year
-let selectedCategory = "Total"; // Default selected category
-let selectedView = "totalSpending"; // Default view
+let selectedVal = ""; // Selected value from selector
+let viewChanged = true;
+let selectedView = "";
 
 // Function to load the JSON data
 async function loadData() {
     try {
-        const response = await fetch('data/budget_by_function.json');
+        const response = await fetch('../data/budget_func_subfunc.json');
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        rawData = await response.json();
-        console.log("Data loaded successfully", rawData);
+        rawFullData = await response.json();
+        console.log("Data loaded successfully");
         processData();
         initializeApplication();
     } catch (error) {
@@ -39,60 +40,136 @@ async function loadData() {
 function processData() {
     console.log("Processing data...");
 
-    // Extract unique categories and years
-    const categoriesSet = new Set();
-    const yearsSet = new Set();
-
     // Process data for each quarter
-    Object.keys(rawData).forEach(quarter => {
+    Object.keys(rawFullData).forEach(quarter => {
         // Extract year from quarter (e.g., "2018Q1" -> "2018")
         const year = quarter.substring(0, 4);
-        yearsSet.add(year);
 
         // Initialize year data if not exists
-        if (!processedYearlyData[year]) {
-            processedYearlyData[year] = {};
+        if (!processedYearlyFullData[year]) {
+            processedYearlyFullData[year] = {};
         }
-
-        // Store quarterly data
-        processedQuarterlyData[quarter] = {};
-
+        
         // Process each category in the quarter
-        rawData[quarter].forEach(item => {
+        rawFullData[quarter].forEach(item => {
             const category = item.name;
+
+            // Skip unnessary data
+            // if (category == 'Unreported Data' || category == 'Governmental Receipts')
+            //     return;
+
             const amount = item.amount;
 
-            categoriesSet.add(category);
-
-            // Add to quarterly data
-            processedQuarterlyData[quarter][category] = amount;
-
             // Aggregate to yearly data
-            if (!processedYearlyData[year][category]) {
-                processedYearlyData[year][category] = 0;
+            if (!('total' in processedYearlyFullData[year])) {
+                processedYearlyFullData[year]['total'] = 0;
             }
-            processedYearlyData[year][category] += amount;
+            processedYearlyFullData[year]['total'] += amount;
+
+            if (!processedYearlyFullData[year][category]) {
+                processedYearlyFullData[year][category] = {};
+            }
+            if (!processedYearlyFullData[year][category]['amount']) {
+                processedYearlyFullData[year][category]['amount'] = 0;
+            }
+            processedYearlyFullData[year][category]['amount'] += amount;
+
+            if (!processedYearlyFullData[year][category]['subfunctions']) {
+                processedYearlyFullData[year][category]['subfunctions'] = {};
+            }
+            if ('subfunctions' in item) {
+                item.subfunctions.forEach(subitem => {
+                    const subCategory = subitem.name;
+                    const subAmount = subitem.amount;
+
+                    if (!processedYearlyFullData[year][category]['subfunctions'][subCategory]) {
+                        processedYearlyFullData[year][category]['subfunctions'][subCategory] = 0;
+                    } 
+                    processedYearlyFullData[year][category]['subfunctions'][subCategory] += subAmount;
+                });
+            }
+        });
+    });
+    
+    // TODO: Move to specific page
+    // Generate barchart needed data
+    Object.keys(processedYearlyFullData).forEach(year => {
+        // Total
+        if (!processedCategoryData['Total']) {
+            processedCategoryData['Total'] = {};
+        }
+        processedCategoryData['Total'][year] = processedYearlyFullData[year].total
+
+        Object.keys(processedYearlyFullData[year]).filter(cat => 
+            cat !== 'total'
+        ).forEach(cat => {
+            if (!processedCategoryData[cat]) {
+                processedCategoryData[cat] = {};
+            }
+            processedCategoryData[cat][year] = processedYearlyFullData[year][cat]['amount'];
         });
     });
 
-    // Convert the set to array
-    categories = Array.from(categoriesSet);
-    console.log("Extracted categories:", categories);
+    // Generate treemap needed data
+    Object.keys(processedYearlyFullData).forEach(year => {
+        if (!processedYearlyCategoryBreakdown[year]) {
+            processedYearlyCategoryBreakdown[year] = {};
+        }
 
-    // Calculate yearly totals
-    Object.keys(processedYearlyData).forEach(year => {
-        let yearTotal = 0;
-        Object.entries(processedYearlyData[year]).forEach(([category, amount]) => {
-            // Exclude certain categories from total
-            if (category !== 'Unreported Data' && category !== 'Governmental Receipts') {
-                yearTotal += amount;
+        categories = [];
+        values = [];
+        percentages = [];
+        parents = [];
+
+        const totalAmount = processedYearlyFullData[year].total;
+
+        // Top/total
+        categories.push('Total');
+        values.push(totalAmount);
+        percentages.push((100.0).toFixed(1));
+        parents.push('');
+
+        Object.keys(processedYearlyFullData[year]).filter(cat => 
+            cat !== 'total'
+        ).forEach(cat => {
+            const catAmount = processedYearlyFullData[year][cat]['amount'];
+
+            categories.push(cat);
+            values.push(catAmount);
+            if (totalAmount == 0) {
+                percentages.push((0.0).toFixed(1));
+            } else {
+                percentages.push((catAmount / totalAmount * 100).toFixed(1));
             }
+            parents.push('Total');
+
+            const subCatData = processedYearlyFullData[year][cat]['subfunctions'];
+
+            Object.keys(subCatData).forEach(subCat => {
+                // Specially handling subcategory equals to parent
+                // e.g. Medicare
+                if (subCat == cat) {
+                    categories.push(subCat.toLowerCase());
+                } else {
+                    categories.push(subCat);
+                }
+                values.push(subCatData[subCat]);
+                if (catAmount == 0) {
+                    percentages.push((0.0).toFixed(1));
+                } else {
+                    percentages.push((subCatData[subCat] / catAmount * 100).toFixed(1));
+                }
+                parents.push(cat);
+            });
         });
-        processedYearlyData[year].Total = yearTotal;
+
+        processedYearlyCategoryBreakdown[year]['categories'] = categories;
+        processedYearlyCategoryBreakdown[year]['values'] = values;
+        processedYearlyCategoryBreakdown[year]['percentages'] = percentages;
+        processedYearlyCategoryBreakdown[year]['parents'] = parents;
     });
 
-    console.log("Processed yearly data:", processedYearlyData);
-    console.log("Data processing complete");
+    console.log("Data processing complete", processedYearlyCategoryBreakdown);
 }
 
 // Function to format large numbers in a more readable way
@@ -131,83 +208,14 @@ function initializeApplication() {
     // Initialize with total spending view
     setActiveView('totalSpending');
 
-    // Initialize year selector dropdown
-    const yearSelector = document.getElementById('yearSelector');
-    if (yearSelector) {
-        // Clear existing options
-        yearSelector.innerHTML = '';
-
-        // Add options for each year (in reverse chronological order)
-        const years = Object.keys(processedYearlyData).sort().reverse();
-        years.forEach(year => {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearSelector.appendChild(option);
-        });
-
-        // Set default value
-        yearSelector.value = selectedYear;
-
-        // Add event listener
-        yearSelector.addEventListener('change', (event) => {
-            selectedYear = event.target.value;
-            updateVisualizations();
-
-            // Update year display
-            document.querySelectorAll('.selected-year-display').forEach(display => {
-                display.textContent = selectedYear;
-            });
-        });
-    }
-
-    // Initialize category selector dropdown
-    const categorySelector = document.getElementById('categorySelect');
-    if (categorySelector) {
-        // Clear existing options
-        categorySelector.innerHTML = '';
-
-        // Add a "Total" option
-        const totalOption = document.createElement('option');
-        totalOption.value = 'Total';
-        totalOption.textContent = 'Total';
-        categorySelector.appendChild(totalOption);
-
-        // Add options for each category (excluding certain ones)
-        const filteredCategories = categories.filter(category =>
-            category !== 'Unreported Data' &&
-            category !== 'Governmental Receipts'
-        ).sort();
-
-        filteredCategories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categorySelector.appendChild(option);
-        });
-
-        // Set default value
-        categorySelector.value = selectedCategory;
-
-        // Add event listener
-        categorySelector.addEventListener('change', (event) => {
-            selectedCategory = event.target.value;
-            updateVisualizations();
-
-            // Update category display
-            document.querySelectorAll('.selected-category-display').forEach(display => {
-                display.textContent = selectedCategory;
-            });
-        });
-    }
-
     // Add event listeners to embedded visualizations
-    addVisualizationEventListeners();
+    // addVisualizationEventListeners();
 }
 
 // Function to set the active view
 function setActiveView(view) {
     console.log(`Setting active view to: ${view}`);
+    viewChanged = true;
     selectedView = view;
 
     // Update active tab
@@ -227,25 +235,24 @@ function setActiveView(view) {
 
     // Update visualizations
     updateVisualizations();
+
+    viewChanged = false;
 }
 
 // Function to update visualizations based on current selections
 function updateVisualizations() {
-    // Log the information about updates
-    console.log(`Updating visualizations for view: ${selectedView}, year: ${selectedYear}, category: ${selectedCategory}`);
-
-    // This function is extended by visualization1.js, visualization2.js, and visualization3.js
-    // to update their respective visualizations
+    // For now, just log that we would update visualizations
+    console.log(`Updating visualizations for view: ${selectedView}`);
 }
 
 // Function to add event listeners to embedded visualizations
 function addVisualizationEventListeners() {
     console.log("Adding visualization event listeners");
 
-    // This is implemented by visualization1.js, visualization2.js, and visualization3.js
+    // This will be implemented by Person 1 and Person 2
     // to add event listeners to their visualizations
 
-    // Listen for messages from embedded visualizations
+    // Example: Listen for messages from embedded visualizations
     window.addEventListener('message', (event) => {
         // Ensure the message is from our visualizations
         if (event.data && event.data.type === 'visualizationEvent') {
@@ -257,50 +264,25 @@ function addVisualizationEventListeners() {
 // Function to handle events from visualizations
 function handleVisualizationEvent(eventData) {
     console.log("Visualization event received:", eventData);
-
-    // Handle different types of events
-    switch (eventData.action) {
-        case 'yearSelected':
-            // Update selected year
-            selectedYear = eventData.year;
-
-            // Update year selector dropdown
-            const yearSelector = document.getElementById('yearSelector');
-            if (yearSelector) {
-                yearSelector.value = selectedYear;
-            }
-
-            // Update visualizations
-            updateVisualizations();
-            break;
-
-        case 'categoryClicked':
-        case 'categorySelected':
-            // Update selected category
-            selectedCategory = eventData.category;
-
-            // Update category selector dropdown
-            const categorySelector = document.getElementById('categorySelect');
-            if (categorySelector) {
-                categorySelector.value = selectedCategory;
-            }
-
-            // Update category display
-            document.querySelectorAll('.selected-category-display').forEach(display => {
-                display.textContent = selectedCategory;
-            });
-
-            // Update visualizations
-            updateVisualizations();
-            break;
-
-        default:
-            console.log("Unknown visualization event action");
-    }
 }
 
 // Initialize the application when the document is loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Document loaded, initializing application...");
     loadData();
+
+    // Add event listener
+    const selector = document.getElementById('selector');
+    if (selector) {
+        selector.addEventListener('change', (event) => {
+            selectedVal = event.target.value;
+            
+            // Update year display
+            document.querySelectorAll('.selected-display').forEach(display => {
+                display.textContent = selectedVal;
+            });
+
+            updateVisualizations();
+        });
+    }
 });
