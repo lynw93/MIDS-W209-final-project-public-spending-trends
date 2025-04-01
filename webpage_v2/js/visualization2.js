@@ -1,118 +1,133 @@
 /**
  * visualization2.js - Category Breakdown Visualization
- *
+ * 
  * This file handles the functionality for the Category Breakdown visualization,
  * which shows government spending broken down by category.
  */
+
+const defaultYear = "2023"; // Default selected year
 
 // Object to manage the category breakdown visualization
 const CategoryBreakdownViz = {
     // Reference to the iframe containing the visualization
     iframe: null,
-
+    
     // Initialize the visualization
     initialize: function() {
         console.log("Initializing Category Breakdown visualization");
-
+        
         this.iframe = document.getElementById('categoryBreakdownViz');
 
-        // Add event listener for iframe messages
-        window.addEventListener('message', (event) => {
-            // Ensure the message is from our iframe
-            if (event.source === this.iframe.contentWindow) {
-                this.handleIframeMessage(event.data);
-            }
-        });
-
+        this.initializeVisualization();
+        
         // Send initial data to the iframe once it's loaded
         this.iframe.addEventListener('load', () => {
-            console.log("Category breakdown iframe loaded");
             this.updateVisualization();
         });
     },
-
+    
     // Update the visualization with current data and settings
     updateVisualization: function() {
         // Check if iframe is loaded
-        if (!this.iframe || !this.iframe.contentWindow) {
+        if (!this.iframe) {
             console.warn("Category breakdown iframe not ready yet");
             return;
         }
-
-        console.log("Updating Category Breakdown visualization with:", {
-            selectedYear: selectedYear,
-            selectedCategory: selectedCategory,
-            categoriesCount: categories.length
-        });
-
-        // Prepare data to send to the iframe
-        const dataToSend = {
-            type: 'updateVisualization',
-            yearlyData: processedYearlyData,
-            selectedYear: selectedYear,
-            selectedCategory: selectedCategory,
-            categories: categories.filter(c => c !== 'Unreported Data' && c !== 'Governmental Receipts')
-        };
-
-        // Send message to iframe
-        this.iframe.contentWindow.postMessage(dataToSend, '*');
+        console.log("Updating Category Breakdown Graph");
+        this.updatePlot();
     },
 
-    // Handle messages from the iframe
-    handleIframeMessage: function(data) {
-        console.log("Message from Category Breakdown visualization:", data);
-
-        if (data.type === 'visualizationEvent') {
-            // Handle different types of events
-            switch (data.action) {
-                case 'categoryClicked':
-                    // Update selected category
-                    selectedCategory = data.category;
-
-                    // Update UI elements
-                    document.getElementById('categorySelect').value = selectedCategory;
-                    document.querySelectorAll('.selected-category-display').forEach(el => {
-                        el.textContent = selectedCategory;
-                    });
-
-                    // Update visualizations
-                    updateVisualizations();
-                    break;
-
-                case 'yearChanged':
-                    // Update selected year
-                    selectedYear = data.year;
-
-                    // Update UI elements
-                    document.getElementById('yearSelector').value = selectedYear;
-                    document.querySelectorAll('.selected-year-display').forEach(el => {
-                        el.textContent = selectedYear;
-                    });
-
-                    // Update other visualizations
-                    updateVisualizations();
-                    break;
-
-                case 'visualizationLoaded':
-                    // Visualization has loaded, update it with current data
-                    this.updateVisualization();
-                    break;
-
-                default:
-                    console.log("Unknown event from Category Breakdown visualization");
-            }
+    // Initialize Visualization
+    initializeVisualization: function() {
+        if (!processedYearlyCategoryBreakdown) {
+            console.log("Missing data, exiting")
+            return;
         }
-    }
-};
+        console.log("Initializing Category Breakdown Graph");
+        this.updatePlot();
+    },
+
+    // Plot update function
+    updatePlot: function() {
+        if (!processedYearlyCategoryBreakdown[selectedVal]) {
+            console.log("Missing data for year: ", selectedVal);
+            return;
+        }
+
+        const yearData = processedYearlyCategoryBreakdown[selectedVal];
+        const labels = yearData.categories;
+        const values = yearData.values;
+        const parents = yearData.parents;
+        const percentages = yearData.percentages;
+
+        var data = [{
+            type: 'treemap',
+            values: values,
+            labels: labels,
+            parents: parents,
+            customdata: percentages,
+            maxdepth: 2,
+            marker: {
+                colors: values,
+                colorscale: 'Earth'
+            },
+            texttemplate: '<b>%{label}</b><br>%{percentParent:.1%}',
+            hovertemplate: '<b>%{label}</b><br>Amount: %{value:$,.0f}<br>Percentage: %{percentParent:.1%}',
+            textposition: "middle center",
+            pathbar: {visible: false},
+            branchvalues: "total",
+        }];
+
+        const layout = {
+            title: `U.S. Government Spending by Category (${selectedVal})`,
+            margin: {t: 20, l: 100, r: 100, b: 20},
+            height: 600,
+            width: 1000,
+            coloraxis: {showscale: false}
+        };
+
+        Plotly.newPlot('categoryBreakdownViz', data, layout);
+    },
+
+}
 
 // Add this visualization to the update function
 const originalUpdateVisualizations2 = updateVisualizations;
 updateVisualizations = function() {
+    console.log("Here here 2");
     // Call original function
     originalUpdateVisualizations2();
-
+    
     // Update this visualization
     if (selectedView === 'budgetCategories') {
+        if (viewChanged) {
+            selectorLabel = document.getElementById('selectorLabel');
+            selectorLabel.textContent = "Select Year: ";
+    
+            // Initialize year selector dropdown
+            const yearSelector = document.getElementById('selector');
+            if (yearSelector) {
+                // Clear existing options
+                yearSelector.innerHTML = '';
+    
+                // Add options for each year (in reverse chronological order)
+                const years = Object.keys(processedYearlyFullData).sort().reverse();
+                years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelector.appendChild(option);
+                });
+    
+                // Set default value
+                yearSelector.value = defaultYear;
+                selectedVal = defaultYear;
+                document.querySelectorAll('.selected-display').forEach(display => {
+                    display.textContent = selectedVal;
+                });   
+            }
+        }
+
         CategoryBreakdownViz.updateVisualization();
     }
 };
@@ -120,11 +135,11 @@ updateVisualizations = function() {
 // Initialize the visualization when the document is loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize after main data is loaded
-    const originalInitializeApplication2 = initializeApplication;
+    const originalInitializeApplication = initializeApplication;
     initializeApplication = function() {
         // Call original function
-        originalInitializeApplication2();
-
+        originalInitializeApplication();
+        
         // Initialize this visualization
         CategoryBreakdownViz.initialize();
     };

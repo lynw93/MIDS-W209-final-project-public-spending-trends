@@ -26,7 +26,6 @@ const SpendingChangeViz = {
 
         // Send initial data to the iframe once it's loaded
         this.iframe.addEventListener('load', () => {
-            console.log("Spending change iframe loaded");
             this.updateVisualization();
         });
     },
@@ -39,10 +38,7 @@ const SpendingChangeViz = {
             return;
         }
 
-        console.log("Updating Spending Change visualization with:", {
-            selectedYear: selectedYear,
-            selectedCategory: selectedCategory
-        });
+        console.log("Updating Spending Change visualization");
 
         // Calculate year-over-year changes
         const changeData = this.calculateChanges();
@@ -51,13 +47,7 @@ const SpendingChangeViz = {
         const dataToSend = {
             type: 'updateVisualization',
             changeData: changeData,
-            selectedYear: selectedYear,
-            selectedCategory: selectedCategory,
-            categories: categories.filter(c =>
-                c !== 'Unreported Data' &&
-                c !== 'Governmental Receipts' &&
-                c !== 'Total'
-            )
+            // selectedYear: selectedYear
         };
 
         // Send message to iframe
@@ -66,7 +56,7 @@ const SpendingChangeViz = {
 
     // Calculate year-over-year changes for all categories
     calculateChanges: function() {
-        const years = Object.keys(processedYearlyData).sort();
+        const years = Object.keys(processedYearlyFullData).sort();
         const changeData = {};
 
         // For each year (except the first one)
@@ -82,30 +72,18 @@ const SpendingChangeViz = {
             // Calculate changes for each category
             categories.filter(c => c !== 'Unreported Data' && c !== 'Governmental Receipts' && c !== 'Total')
                 .forEach(category => {
-                    const currentAmount = processedYearlyData[currentYear][category] || 0;
-                    const previousAmount = processedYearlyData[previousYear][category] || 0;
+                    const currentAmount = processedYearlyFullData[currentYear][category] || 0;
+                    const previousAmount = processedYearlyFullData[previousYear][category] || 0;
 
-                    // Always store the change, even if previous amount is 0
-                    changeData[currentYear].categories[category] = {
-                        absoluteChange: currentAmount - previousAmount,
-                        percentageChange: previousAmount > 0 ?
-                            ((currentAmount - previousAmount) / previousAmount) * 100 :
-                            currentAmount > 0 ? 100 : 0
-                    };
+                    if (previousAmount > 0) { // Avoid division by zero
+                        changeData[currentYear].categories[category] = {
+                            absoluteChange: currentAmount - previousAmount,
+                            percentageChange: ((currentAmount - previousAmount) / previousAmount) * 100
+                        };
+                    }
                 });
-
-            // Also calculate total change
-            const currentTotal = processedYearlyData[currentYear].Total || 0;
-            const previousTotal = processedYearlyData[previousYear].Total || 0;
-
-            changeData[currentYear].total = {
-                absoluteChange: currentTotal - previousTotal,
-                percentageChange: previousTotal > 0 ?
-                    ((currentTotal - previousTotal) / previousTotal) * 100 : 0
-            };
         }
 
-        console.log("Calculated change data:", changeData);
         return changeData;
     },
 
@@ -117,37 +95,19 @@ const SpendingChangeViz = {
             // Handle different types of events
             switch (data.action) {
                 case 'yearPairSelected':
-                    // Update the year to the end year of the pair
-                    selectedYear = data.year;
-
-                    // Update UI elements
-                    document.getElementById('yearSelector').value = selectedYear;
-                    document.querySelectorAll('.selected-year-display').forEach(el => {
-                        el.textContent = selectedYear;
-                    });
-
-                    // Update visualizations
-                    updateVisualizations();
+                    // Update the year pair selection in the UI
+                    // This would be implemented if there's a UI element to select year pairs
                     break;
 
                 case 'categorySelected':
-                case 'categoryClicked':
-                    // Update selected category
-                    selectedCategory = data.category;
-
-                    // Update UI elements
-                    document.getElementById('categorySelect').value = selectedCategory;
-                    document.querySelectorAll('.selected-category-display').forEach(el => {
-                        el.textContent = selectedCategory;
+                    // Trigger event to show category details
+                    const event = new CustomEvent('categorySelected', {
+                        detail: {
+                            category: data.category,
+                            // year: selectedYear
+                        }
                     });
-
-                    // Update visualizations
-                    updateVisualizations();
-                    break;
-
-                case 'visualizationLoaded':
-                    // Visualization has loaded, update it with current data
-                    this.updateVisualization();
+                    document.dispatchEvent(event);
                     break;
 
                 default:
@@ -160,6 +120,7 @@ const SpendingChangeViz = {
 // Add this visualization to the update function
 const originalUpdateVisualizations3 = updateVisualizations;
 updateVisualizations = function() {
+    console.log("Here here 3");
     // Call original function
     originalUpdateVisualizations3();
 
