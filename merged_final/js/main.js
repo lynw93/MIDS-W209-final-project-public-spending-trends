@@ -34,7 +34,7 @@ function calculatePercentChange(oldValue, newValue) {
 async function loadData() {
     try {
         // const response = await fetch("data/budget_by_function.json");
-        const response = await fetch("data/budget_func_subfunc.json");
+        const response = await fetch("data/budget_by_function.json");
 
         const jsonData = await response.json();
 
