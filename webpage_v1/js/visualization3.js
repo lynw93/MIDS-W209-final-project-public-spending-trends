@@ -56,7 +56,7 @@ const SpendingChangeViz = {
 
     // Calculate year-over-year changes for all categories
     calculateChanges: function() {
-        const years = Object.keys(processedYearlyData).sort();
+        const years = Object.keys(processedYearlyFullData).sort();
         const changeData = {};
 
         // For each year (except the first one)
@@ -72,8 +72,8 @@ const SpendingChangeViz = {
             // Calculate changes for each category
             categories.filter(c => c !== 'Unreported Data' && c !== 'Governmental Receipts' && c !== 'Total')
                 .forEach(category => {
-                    const currentAmount = processedYearlyData[currentYear][category] || 0;
-                    const previousAmount = processedYearlyData[previousYear][category] || 0;
+                    const currentAmount = processedYearlyFullData[currentYear][category] || 0;
+                    const previousAmount = processedYearlyFullData[previousYear][category] || 0;
 
                     if (previousAmount > 0) { // Avoid division by zero
                         changeData[currentYear].categories[category] = {

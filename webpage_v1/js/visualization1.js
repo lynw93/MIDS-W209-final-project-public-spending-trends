@@ -18,13 +18,8 @@ const TotalSpendingViz = {
         
         this.iframe = document.getElementById('totalSpendingViz');
         
-        // Add event listener for iframe messages
-        // window.addEventListener('message', (event) => {
-        //     // Ensure the message is from our iframe
-        //     if (event.source === this.iframe.contentWindow) {
-        //         this.handleIframeMessage(event.data);
-        //     }
-        // });
+
+        this.initializeVisualization();
         
         // Send initial data to the iframe once it's loaded
         this.iframe.addEventListener('load', () => {
@@ -35,53 +30,55 @@ const TotalSpendingViz = {
     // Update the visualization with current data and settings
     updateVisualization: function() {
         // Check if iframe is loaded
-        if (!this.iframe || !this.iframe.contentWindow) {
+        if (!this.iframe) {
             console.warn("Total spending iframe not ready yet");
             return;
         }
         
         console.log("Updating Total Spending visualization");
         
-        // Prepare data to send to the iframe
-        // const dataToSend = {
-        //     type: 'updateVisualization',
-        //     yearlyData: processedYearlyData,
-        //     // selectedYear: selectedYear
-        // };
-        
-        // // Send message to iframe
-        // this.iframe.contentWindow.postMessage(dataToSend, '*');
+        this.updatePlot();
     },
-    
-    // Handle messages from the iframe
-    // handleIframeMessage: function(data) {
-    //     console.log("Message from Total Spending visualization:", data);
-        
-    //     if (data.type === 'visualizationEvent') {
-    //         // Handle different types of events
-    //         switch (data.action) {
-    //             case 'yearClicked':
-    //                 // Update selected year
-    //                 selectedYear = data.year;
-                    
-    //                 // Update UI elements
-    //                 document.getElementById('yearSelector').value = 
-    // 
-    // 
-    // ;
-    //                 document.querySelectorAll('.selected-year-display').forEach(el => {
-    //                     el.textContent = selectedYear;
-    //                 });
-                    
-    //                 // Update other visualizations
-    //                 updateVisualizations();
-    //                 break;
-                    
-    //             default:
-    //                 console.log("Unknown event from Total Spending visualization");
-    //         }
-    //     }
-    // }
+
+    // Initialize Visualization
+    initializeVisualization: function() {
+        if (!processedCategoryData) {
+            console.log("Missing data, exiting")
+            return;
+        }
+        console.log("Initializing Total Saving Graph");
+        this.updatePlot();
+    },
+
+    // Plot update function
+    updatePlot: function() {
+        if (!processedCategoryData[selectedVal]) {
+            console.log("Missing data for category: ", selectedVal);
+            return;
+        }
+
+        years = Object.keys(processedCategoryData[selectedVal]).sort().reverse();
+        values = []
+
+        years.forEach(year => {
+            values.push(processedCategoryData[selectedVal][year]);
+        });
+
+        var data = [{
+            x: years,
+            y: values,
+            type: 'bar'
+        }];
+
+        const layout = {
+            margin: {t: 20, l: 100, r: 100, b: 20},
+            height: 500,
+            width: 1000,
+            coloraxis: {showscale: false}
+        };
+          
+        Plotly.newPlot('totalSpendingViz', data, layout);
+    },
 };
 
 // Add this visualization to the update function
@@ -95,7 +92,7 @@ updateVisualizations = function() {
     if (selectedView === 'totalSpending') {
         if (viewChanged) {
             selectorLabel = document.getElementById('selectorLabel');
-            selectorLabel.textContent = "Category: ";
+            selectorLabel.textContent = "Select Category: ";
 
             // Initialize selector dropdown
             const categorySelector = document.getElementById('selector');
@@ -103,8 +100,8 @@ updateVisualizations = function() {
                 // Clear existing options
                 categorySelector.innerHTML = '';
 
-                // Add options for categories (in reverse chronological order)
-                const categories = Object.keys(processedCategoryData).sort().reverse();
+                // Add options for categories (in chronological order)
+                const categories = Object.keys(processedCategoryData).sort();
                 categories.forEach(category => {
                     const option = document.createElement('option');
                     option.value = category;
