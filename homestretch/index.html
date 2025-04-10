@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>U.S. Government Spending Visualization</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <h1>U.S. Government Spending</h1>
+      <p>Explore U.S. Government spending data from 2018 to 2024</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="loadingIndicator" class="loading-indicator">
+      <div class="spinner"></div>
+      <p>Loading data...</p>
+    </div>
+
+    <div id="loadingError" class="error-message" style="display: none;"></div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-view="totalSpending">Total Spending</div>
+      <div class="nav-tab" data-view="budgetCategories">Budget Categories</div>
+      <div class="nav-tab" data-view="spendingChanges">Spending Changes</div>
+      <div class="nav-tab" id="impactful-tab" data-view="impactfulEvents">Impactful Events</div>
+      <div class="nav-tab" id="mandatory-tab" data-view="mandatoryDiscretionary">Mandatory vs. Discretionary</div>
+      <div class="nav-tab" data-view="about" style="margin-left: auto;">About</div>
+    </div>
+
+    <!-- Total Spending Section -->
+<section id="totalSpendingContent" class="content-section">
+    <div class="section-header">
+      <h2><span class="selected-display" id="selected-category-display">Total</span> Government Spending Over Time</h2>
+      <a href="#understandingChartTotals" class="help-link">Help</a>
+    </div>    
+    <div class="selector-container_totalSpending">
+      <label for="total_selector" id="selectorLabelTotal">Select Category:</label>
+      <select id="total_selector"></select>
+    </div>
+    <div class="visualization-container">
+        <dev id="totalSpendingViz" class="visualization-iframe"></dev>
+    </div>
+    <div class="explanation">
+      <h3 id="understandingChartTotals">Understanding This Chart</h3>
+      <p>This bar chart shows total U.S. government spending from 2018 to 2024, measured in trillions of dollars. Each bar represents the sum of all spending categories for a given year. You can use the dropdown to view spending trends for specific categories or view all categories combined. Hover over each bar to see the exact amount spent that year.</p>
+    </div>
+  </section>
+  
+  <!-- Budget Categories Section -->
+  <section id="budgetCategoriesContent" class="content-section" style="display: none;">
+    <div class="section-header">
+      <h2>Budget Categories for <span class="selected-display" id="selected-year-display">2023</span></h2>
+      <a href="#understandingChartBudgetcategories" class="help-link">Help</a>
+    </div>
+    <div class="selector-container_budgetCategories">
+      <label for="budget_selector" id="selectorLabelBudget">Select Category:</label>
+      <select id="budget_selector"></select>
+    </div>
+    <div class="visualization-container">
+      <div id="categoryBreakdownViz" class="visualization-iframe"></div>
+    </div>
+    <div class="explanation">
+      <h3 id="understandingChartBudgetcategories">Understanding This Chart</h3>
+      <p>
+        This treemap shows how government spending breaks down by major category and subcategory. Each top-level category is assigned a unique color, and all of its subcategories share that same color to indicate grouping. Larger boxes represent larger spending amounts.
+      </p>
+    </div>
+  </section>
+
+    <!-- Spending Changes Section -->
+    <section id="spendingChangesContent" class="content-section" style="display: none;">
+      <div class="section-header">
+        <h2>Spending Changes Between Years</h2>
+        <a href="#understandingSpendingchanges" class="help-link">Help</a>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px; flex-wrap: wrap;">
+        <!-- Dropdowns Group -->
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="beginYearSelector"><strong>Begin Year:</strong></label>
+          <select id="beginYearSelector">
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023" selected>2023</option>
+          </select>
+          <label for="endYearSelector"><strong>- End Year:</strong></label>
+          <select id="endYearSelector">
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024" selected>2024</option>
+          </select>
+        </div>
+      
+        <!-- Color Guide Box -->
+<div style="background-color: #f8f9fa; border-left: 3px solid #007BFF; padding: 4px 8px; font-size: 0.85em; white-space: nowrap; display: inline-block;">
+  <strong>Color Guide:</strong>
+  <span style="margin-left: 6px;">
+    <span style="color: #a50026;"><i><b>Red</b></i></span> = Percent decrease in spending,
+    <span style="color: #313695;"><i><b>blue</b></i></span> = Percent increase in spending. 
+    <b><i>Darker</b></i> = Indicate larger percentage changes.
+  </span>
+</div>
+      </div>
+
+      <div class="visualization-container">
+        <iframe id="spendingChangeViz" class="visualization-iframe" src="visualizations/spending_changes.html" frameborder="0"></iframe>
+      </div>
+
+      <div class="explanation">
+        <h3 id="understandingSpendingchanges">Understanding This Chart</h3>
+        <p>This chart shows how government spending has changed from year to year across different budget categories.</p>
+        <p>Use the dropdown menu to select different year pairs for comparison.</p>
+      </div>
+    </section>
+
+    <section id="impactfulEventsContent" class="content-section" style="display: none;">
+        <div class="section-header">
+          <h2>Impact of Major Events on Spending</h2>
+          <a href="#understandingImpactfulevents" class="help-link">Help</a>
+        </div>
+        <div class="events-selector">
+          <h3>Select events to explore:</h3>
+          <div class="event-checkbox-container">
+            <label><input type="radio" name="impact-event" value="covid" checked> COVID-19 Pandemic</label>
+            <label><input type="radio" name="impact-event" value="ukraine"> Ukraine War</label>
+            <label><input type="radio" name="impact-event" value="inflation"> Inflation Crisis</label>
+            <label><input type="radio" name="impact-event" value="all"> All Events</label>
+          </div>
+        </div>
+        <div id="eventsVisualizationContainer" class="visualization-container"></div>
+      
+        <div class="explanation">
+          <h3 id="understandingImpactfulevents">Understanding This Chart</h3>
+          <p>This chart highlights select categorical spending during an event time period for comparison purposes. 
+            Select an event using the radio buttons above to highlight its specific impact. The visualization includes shaded periods marking each event and peak spending points for key budget categories during these times.
+          <br><br> <i>Important</i>: Assumptions cannot be made without further analysis due to the fact that it's possible to have 
+          many events impacting data at one time.  In addition, an event may cause impact beyond its duration.</p>
+        </div>
+      </section>
+      
+
+    <section id="mandatoryDiscretionaryContent" class="content-section" style="display: none;">
+        <div class="section-header">
+          <h2 style="display: flex; align-items: center; gap: 8px;">
+            Mandatory vs. Discretionary Spending
+            <span class="tooltip-icon">ℹ️
+              <span class="tooltip-text">Note: Discretionary spending is funding that Congress decides annually—like education, defense, and transportation.</span>
+            </span>
+          </h2>
+          <a href="#understandingManvsdisc" class="help-link">Help</a>
+        </div>
+        <div class="visualization-container">
+          <iframe
+            id="mandatoryDiscretionaryViz"
+            class="visualization-iframe"
+            src="visualizations/mandatory_discretionary.html"
+            frameborder="0"
+            width="100%"
+            height="600"
+          ></iframe>
+        </div>
+        
+        <div class=\"explanation\">
+            <h3 id="understandingManvsdisc">Understanding This Chart</h3>
+            <p>This chart shows the proportion of mandatory versus discretionary spending in the U.S. government budget for selected years. Use the dropdown menu above to explore the spending split for different years.</p><br>
+            <p><b><i>Mandatory spending</i></b> includes Social Security, Medicare, Medicaid, veterans benefits, and other programs required by law. <br>
+              <b><i>Discretionary spending</b></i> is set annually by Congress through appropriations (e.g., defense, education, infrastructure).</p>
+            <p style=\"font-size: 12px; color: #555;\">
+              <em>Source: <a href=\"https://www.cbo.gov/publication/57660\" target=\"_blank\">Congressional Budget Office – Common Budgetary Terms Explained</a></em>
+            </p>
+          </div>
+      </section>   
+
+      <section id="aboutContent" class="content-section" style="display: none;">
+        <h2>About This Project</h2>
+        bhah
+      </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+        <p>Government Spending Data source: <a href="https://www.usaspending.gov/" target="_blank">USAspending.gov</a> |
+            Inflation Data source: <a href="https://fred.stlouisfed.org/series/CPIAUCSL" target="_blank">fred.stlouisfed.org</a> |
+            Created for Berkeley DATASCI 209 Final Project</p>
+    </div>
+</footer>
+
+<!-- Scripts (order matters!) -->
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script src="js/plotly-3.0.1.min.js"></script>
+
+<!-- Main must come before other visualizations so global functions are defined -->
+<script src="js/main.js"></script>
+<script src="js/impactful_events.js"></script>
+
+<!-- Visualization logic -->
+<script src="js/visualization1.js"></script>
+<script src="js/visualization2.js"></script>
+<script src="js/visualization3.js"></script>
+
+<script>
+  // Ensure setupImpactfulEventsTab is accessible globally
+  window.setupImpactfulEventsTab = setupImpactfulEventsTab;
+</script>
+  
+</body>
+
+</html>

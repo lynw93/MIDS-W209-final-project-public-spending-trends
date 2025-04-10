@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mandatory vs. Discretionary Spending</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+        }
+
+        .tooltip {
+            font-size: 12px;
+        }
+
+        .year-selector {
+            margin: 20px;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="year-selector">
+        <label for="yearSelect">Select Year:</label>
+        <select id="yearSelect">
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024" selected>2024</option>
+        </select>
+    </div>
+
+    <div id="spendingTypeChart" class="chart-container" style="position: relative;"></div>
+
+    <div id="tooltip" style="
+    position: absolute;
+    opacity: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    pointer-events: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 1000;">
+    </div>
+
+
+    <script src="../js/mandatory_discretionary.js"></script>
+</body>
+</html>
+
