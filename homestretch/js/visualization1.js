@@ -77,6 +77,8 @@ const TotalSpendingViz = {
             x: years,
             y: values,
             type: 'bar',
+            text: values.map(v => `$${(v / 1e12).toFixed(0)}T`),  // Add readable labels
+            textposition: 'outside',
             hovertemplate: 'Amount: %{y:$,.0f}<extra></extra>',
             marker: {
                 color: 'steelblue'

@@ -29,8 +29,8 @@
       <div class="nav-tab active" data-view="totalSpending">Total Spending</div>
       <div class="nav-tab" data-view="budgetCategories">Budget Categories</div>
       <div class="nav-tab" data-view="spendingChanges">Spending Changes</div>
-      <div class="nav-tab" id="impactful-tab" data-view="impactfulEvents">Impactful Events</div>
       <div class="nav-tab" id="mandatory-tab" data-view="mandatoryDiscretionary">Mandatory vs. Discretionary</div>
+      <div class="nav-tab" id="impactful-tab" data-view="impactfulEvents">Impactful Events</div>
       <div class="nav-tab" data-view="about" style="margin-left: auto;">About</div>
     </div>
 
@@ -126,6 +126,39 @@
       </div>
     </section>
 
+    <section id="mandatoryDiscretionaryContent" class="content-section" style="display: none;">
+      <div class="section-header">
+        <h2 style="display: flex; align-items: center; gap: 8px;">
+          Mandatory vs. Discretionary Spending
+          <span class="tooltip-icon">ℹ️
+            <span class="tooltip-text">Note: Discretionary spending is funding that Congress decides annually—like education, defense, and transportation.</span>
+          </span>
+        </h2>
+        <a href="#understandingManvsdisc" class="help-link">Help</a>
+      </div>
+      <div class="visualization-container">
+        <iframe
+          id="mandatoryDiscretionaryViz"
+          class="visualization-iframe"
+          src="visualizations/mandatory_discretionary.html"
+          frameborder="0"
+          width="100%"
+          height="600"
+        ></iframe>
+      </div>
+      
+      <div class=\"explanation\">
+          <h3 id="understandingManvsdisc">Understanding This Chart</h3>
+          <p>This chart shows the proportion of mandatory versus discretionary spending in the U.S. government budget for selected years. Use the dropdown menu above to explore the spending split for different years.</p><br>
+          <p><b><i>Mandatory spending</i></b> includes Social Security, Medicare, Medicaid, veterans benefits, and other programs required by law. <br>
+            <b><i>Discretionary spending</b></i> is set annually by Congress through appropriations (e.g., defense, education, infrastructure).</p>
+          <p style=\"font-size: 12px; color: #555;\">
+            <em>Source: <a href=\"https://www.cbo.gov/publication/57660\" target=\"_blank\">Congressional Budget Office – Common Budgetary Terms Explained</a></em>
+          </p>
+        </div>
+    </section>  
+
+    
     <section id="impactfulEventsContent" class="content-section" style="display: none;">
         <div class="section-header">
           <h2>Impact of Major Events on Spending</h2>
@@ -150,39 +183,7 @@
           many events impacting data at one time.  In addition, an event may cause impact beyond its duration.</p>
         </div>
       </section>
-      
-
-    <section id="mandatoryDiscretionaryContent" class="content-section" style="display: none;">
-        <div class="section-header">
-          <h2 style="display: flex; align-items: center; gap: 8px;">
-            Mandatory vs. Discretionary Spending
-            <span class="tooltip-icon">ℹ️
-              <span class="tooltip-text">Note: Discretionary spending is funding that Congress decides annually—like education, defense, and transportation.</span>
-            </span>
-          </h2>
-          <a href="#understandingManvsdisc" class="help-link">Help</a>
-        </div>
-        <div class="visualization-container">
-          <iframe
-            id="mandatoryDiscretionaryViz"
-            class="visualization-iframe"
-            src="visualizations/mandatory_discretionary.html"
-            frameborder="0"
-            width="100%"
-            height="600"
-          ></iframe>
-        </div>
-        
-        <div class=\"explanation\">
-            <h3 id="understandingManvsdisc">Understanding This Chart</h3>
-            <p>This chart shows the proportion of mandatory versus discretionary spending in the U.S. government budget for selected years. Use the dropdown menu above to explore the spending split for different years.</p><br>
-            <p><b><i>Mandatory spending</i></b> includes Social Security, Medicare, Medicaid, veterans benefits, and other programs required by law. <br>
-              <b><i>Discretionary spending</b></i> is set annually by Congress through appropriations (e.g., defense, education, infrastructure).</p>
-            <p style=\"font-size: 12px; color: #555;\">
-              <em>Source: <a href=\"https://www.cbo.gov/publication/57660\" target=\"_blank\">Congressional Budget Office – Common Budgetary Terms Explained</a></em>
-            </p>
-          </div>
-      </section>   
+       
 
       <section id="aboutContent" class="content-section" style="display: none;">
         <h2>About This Project</h2>
