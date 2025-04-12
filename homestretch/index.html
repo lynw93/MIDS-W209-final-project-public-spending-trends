@@ -31,7 +31,7 @@
       <div class="nav-tab" data-view="spendingChanges">Spending Changes</div>
       <div class="nav-tab" id="mandatory-tab" data-view="mandatoryDiscretionary">Mandatory vs. Discretionary</div>
       <div class="nav-tab" id="impactful-tab" data-view="impactfulEvents">Impactful Events</div>
-      <div class="nav-tab" data-view="about" style="margin-left: auto;">About</div>
+      <div class="nav-tab" data-view="about">About</div>
     </div>
 
     <!-- Total Spending Section -->
@@ -39,7 +39,7 @@
     <div class="section-header">
       <h2><span class="selected-display" id="selected-category-display">Total</span> Government Spending Over Time</h2>
       <a href="#understandingChartTotals" class="help-link">Help</a>
-    </div>    
+    </div>
     <div class="selector-container_totalSpending">
       <label for="total_selector" id="selectorLabelTotal">Select Category:</label>
       <select id="total_selector"></select>
@@ -52,7 +52,7 @@
       <p>This bar chart shows total U.S. government spending from 2018 to 2024, measured in trillions of dollars. Each bar represents the sum of all spending categories for a given year. You can use the dropdown to view spending trends for specific categories or view all categories combined. Hover over each bar to see the exact amount spent that year.</p>
     </div>
   </section>
-  
+
   <!-- Budget Categories Section -->
   <section id="budgetCategoriesContent" class="content-section" style="display: none;">
     <div class="section-header">
@@ -103,13 +103,13 @@
             <option value="2024" selected>2024</option>
           </select>
         </div>
-      
+
         <!-- Color Guide Box -->
 <div style="background-color: #f8f9fa; border-left: 3px solid #007BFF; padding: 4px 8px; font-size: 0.85em; white-space: nowrap; display: inline-block;">
   <strong>Color Guide:</strong>
   <span style="margin-left: 6px;">
     <span style="color: #a50026;"><i><b>Red</b></i></span> = Percent decrease in spending,
-    <span style="color: #313695;"><i><b>blue</b></i></span> = Percent increase in spending. 
+    <span style="color: #313695;"><i><b>blue</b></i></span> = Percent increase in spending.
     <b><i>Darker</b></i> = Indicate larger percentage changes.
   </span>
 </div>
@@ -146,7 +146,7 @@
           height="600"
         ></iframe>
       </div>
-      
+
       <div class=\"explanation\">
           <h3 id="understandingManvsdisc">Understanding This Chart</h3>
           <p>This chart shows the proportion of mandatory versus discretionary spending in the U.S. government budget for selected years. Use the dropdown menu above to explore the spending split for different years.</p><br>
@@ -156,9 +156,9 @@
             <em>Source: <a href=\"https://www.cbo.gov/publication/57660\" target=\"_blank\">Congressional Budget Office – Common Budgetary Terms Explained</a></em>
           </p>
         </div>
-    </section>  
+    </section>
 
-    
+
     <section id="impactfulEventsContent" class="content-section" style="display: none;">
         <div class="section-header">
           <h2>Impact of Major Events on Spending</h2>
@@ -174,20 +174,49 @@
           </div>
         </div>
         <div id="eventsVisualizationContainer" class="visualization-container"></div>
-      
+
         <div class="explanation">
           <h3 id="understandingImpactfulevents">Understanding This Chart</h3>
-          <p>This chart highlights select categorical spending during an event time period for comparison purposes. 
+          <p>This chart highlights select categorical spending during an event time period for comparison purposes.
             Select an event using the radio buttons above to highlight its specific impact. The visualization includes shaded periods marking each event and peak spending points for key budget categories during these times.
-          <br><br> <i>Important</i>: Assumptions cannot be made without further analysis due to the fact that it's possible to have 
+          <br><br> <i>Important</i>: Assumptions cannot be made without further analysis due to the fact that it's possible to have
           many events impacting data at one time.  In addition, an event may cause impact beyond its duration.</p>
         </div>
       </section>
-       
+
 
       <section id="aboutContent" class="content-section" style="display: none;">
         <h2>About This Project</h2>
-        bhah
+
+        <h3 style="margin-top: 30px;">Team Members</h3>
+        <ul style="margin-left: 1.5em;">
+          <li>Lyn Wang</li>
+          <li>Erica Robeen</li>
+          <li>Gatsby Frimpong</li>
+        </ul>
+
+        <h3 style="margin-top: 30px;">Project Overview</h3>
+        <p>This project allows for a deep dive into government financial decisions and helps users identify shifts in funding priorities. The interactive charts are designed to be intuitive, visually engaging, and informative.</p>
+
+        <h3 style="margin-top: 30px;">Our Goals</h3>
+        <ul style="margin-left: 1.5em;">
+          <li>Provide transparency in how tax dollars are spent</li>
+          <li>Track spending trends across fiscal years</li>
+          <li>Break down spending by programs and categories</li>
+          <li>Analyze the impact of major world events on federal spending</li>
+        </ul>
+
+        <h3 style="margin-top: 30px;">Target Audience</h3>
+        <ul style="margin-left: 1.5em;">
+          <li><strong>General Public / Taxpayers:</strong> Citizens seeking to better understand how their tax dollars are allocated and the value they receive for their investment</li>
+          <li><strong>Policymakers / Economists:</strong> Those who can use this information to inform policy, measure efficiency, and uphold accountability</li>
+        </ul>
+
+        <h3 style="margin-top: 30px;">Data Sources</h3>
+        <ul style="margin-left: 1.5em;">
+          <li>Government spending data from <a href="https://www.usaspending.gov/" target="_blank">USAspending.gov</a> via their API</li>
+          <li>Inflation data sourced from <a href="https://fred.stlouisfed.org/series/CPIAUCSL" target="_blank">Federal Reserve Economic Data (FRED)</a></li>
+        </ul>
       </section>
 
   </main>
@@ -217,7 +246,7 @@
   // Ensure setupImpactfulEventsTab is accessible globally
   window.setupImpactfulEventsTab = setupImpactfulEventsTab;
 </script>
-  
+
 </body>
 
 </html>
