@@ -15,7 +15,7 @@ Gatsby Frimpong, Lyn Wang, Erica Robeen
 
 
 
-### **Demo:**<br>
+### **Demo:** [link](https://subtle-horse-f61009.netlify.app/) <br>
 
 
 
