@@ -11,11 +11,11 @@ We are digging into U.S. government spending data to analyze trends in governmen
 Gatsby Frimpong, Lyn Wang, Erica Robeen
 
 
-### **Project Webpage:**<br>
+### **Project Webpage:** [link](https://subtle-horse-f61009.netlify.app/) <br>
 
 
 
-### **Demo:** [link](https://subtle-horse-f61009.netlify.app/) <br>
+### **Demo:** [link](https://www.youtube.com/watch?v=BLh1us7eVE8) <br>
 
 
 
